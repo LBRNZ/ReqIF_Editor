@@ -9,6 +9,9 @@ Reqif Editor is a tool to open and edit .reqif and .reqifz files.
 ## Preview
 ![](README/MainWindow.png?raw=true)
 
+## Release
+The latest release can be found here: [Release](https://github.com/LBRNZ/ReqIF_Editor/releases/latest)
+
 ## Used Libraries
 * ControlzEx
 * Extended.WPF.Toolkit
