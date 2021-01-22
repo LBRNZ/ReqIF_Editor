@@ -52,7 +52,14 @@
                                            Width="500"
                                            TextWrapping="WrapWithOverflow"
                                            Margin="100,10,0,0"/>
-                                <TextBlock Text="Projektseite: https://github.com/Ottokranz/ReqIF_Editor" FontSize="16" Margin="100,10,0,0"/>
+                                <TextBlock FontSize="16" Margin="100,10,0,0">
+                                    Projektseite: 
+                                        <Hyperlink 
+                                            NavigateUri="https://github.com/LBRNZ/ReqIF_Editor"
+                                            RequestNavigate="Hyperlink_RequestNavigate">
+                                            https://github.com/LBRNZ/ReqIF_Editor
+                                        </Hyperlink>
+                                </TextBlock>
                             </WrapPanel>
                         </Fluent:BackstageTabItem>
                         <Fluent:Button Header="Beenden" Click="Button_Exit_Click"/>
