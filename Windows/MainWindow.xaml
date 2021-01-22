@@ -1,0 +1,217 @@
+﻿<Fluent:RibbonWindow x:Class="ReqIF_Editor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Fluent="urn:fluent-ribbon"
+        xmlns:local="clr-namespace:ReqIF_Editor"
+        xmlns:c="clr-namespace:ReqIF_Editor.Commands"
+        xmlns:properties="clr-namespace:ReqIF_Editor.Properties"
+        mc:Ignorable="d"
+        Title="ReqIF Editor" Height="1080" Width="1920" WindowState="Maximized">
+    <Window.Resources>
+        <local:HierarchyObjectValueConverter x:Key="HierarchyObjectValueConverter"/>
+        <local:SpecificationChildrenValueConverter x:Key="SpecificationChildrenValueConverter"/>
+        <local:SearchResultObjectValueConverter x:Key="SearchResultObjectValueConverter"/>
+        <HierarchicalDataTemplate x:Key="ChildrenTemplate" 
+                              ItemsSource="{Binding Path=Children, Converter={StaticResource SpecificationChildrenValueConverter}}">
+            <TextBlock Text="{Binding Path=Object, Converter={StaticResource HierarchyObjectValueConverter}}" Foreground="#FF3C3C3C" Padding="0,2,0,2"/>
+        </HierarchicalDataTemplate>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Fluent:Ribbon Grid.Row="0">
+            <!--Backstage-->
+            <Fluent:Ribbon.Menu>
+                <Fluent:Backstage>
+                    <Fluent:BackstageTabControl>
+                        <Fluent:Button Header="Öffnen" Click="Button_OpenFile_Click" />
+                        <Fluent:BackstageTabItem Header="Einstellungen">
+                            <WrapPanel Orientation="Vertical" Margin="30">
+                                <TextBlock Text="Einstellungen" FontSize="34"/>
+                                <Fluent:CheckBox Header="Rechteeinschränkung in ReqIF ignorieren"
+                                                 Foreground="Black" Margin="0,20,0,10"
+                                                 IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=overrideReqifRights, Mode=TwoWay}"
+                                                 FontSize="16"/>
+                                <TextBlock Text="Beim Bearbeiten von Attributwerten wird die Einschränkung von Schreibrechten im Dokument ignoriert. Alle Attributwerte können bearbeitet werden."/>
+                            </WrapPanel>
+                        </Fluent:BackstageTabItem>
+                        <Fluent:BackstageTabItem Header="Über">
+                            <WrapPanel Orientation="Vertical" Margin="30">
+                                <WrapPanel Orientation="Horizontal" >
+                                    <Image Source="/ReqIF_Editor;component/images/ReqIF_Editor_Icon.ico" Width="80"/>
+                                    <TextBlock Text="ReqIF Editor" FontSize="38" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                                </WrapPanel>
+                                <TextBlock Text="Version 2.1" FontSize="16" Margin="100,10,0,0"/>
+                                <TextBlock Text="ReqIF Editor ist eine Anwendung zum Beatrachten und Bearbeiten von .reqif Dateien. ReqIF ist ein XML-Dateiformat, mit dessen Hilfe Anforderungen samt zugehöriger Metadaten zwischen Software-Werkzeugen verschiedener Hersteller ausgetauscht werden können." 
+                                           FontSize="16"
+                                           Width="500"
+                                           TextWrapping="WrapWithOverflow"
+                                           Margin="100,10,0,0"/>
+                                <TextBlock Text="Projektseite: https://github.com/Ottokranz/ReqIF_Editor" FontSize="16" Margin="100,10,0,0"/>
+                            </WrapPanel>
+                        </Fluent:BackstageTabItem>
+                        <Fluent:Button Header="Beenden" Click="Button_Exit_Click"/>
+                    </Fluent:BackstageTabControl>
+                </Fluent:Backstage>
+            </Fluent:Ribbon.Menu>
+
+            <!--Tabs-->
+            <Fluent:RibbonTabItem Header="Start">
+                <Fluent:RibbonGroupBox Header="Inhalt">
+                    <Fluent:Button Header="Öffnen"
+                                   Icon="{StaticResource OpenIcon}"
+                                   LargeIcon="{StaticResource OpenIcon}"
+                                   Click="Button_OpenFile_Click" />
+                    <Fluent:ToggleButton Header="Navigation"
+                                Icon="{StaticResource NavigationIcon}"
+                                LargeIcon="{StaticResource NavigationIcon}"
+                                x:Name="NavigationButton"
+                                IsChecked="{Binding Path=Expanded, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                Command="c:MainWindowCommand.ShowNavigation"/>
+                    <Fluent:Button Header="Suche"
+                                Icon="{StaticResource SearchIcon}"
+                                LargeIcon="{StaticResource SearchIcon}"
+                                x:Name="SearchButton"
+                                Command="c:MainWindowCommand.ShowSearch"/>
+                    <Fluent:Button Header="Speichern"
+                                Icon="{StaticResource SaveIcon}"
+                                LargeIcon="{StaticResource SaveIcon}"
+                                Command="c:MainWindowCommand.SaveFile"/>
+                    <Fluent:Button Header="Schließen"
+                                Icon="{StaticResource CloseXIcon}"
+                                LargeIcon="{StaticResource CloseXIcon}"
+                                Command="c:MainWindowCommand.CloseFile"/>
+                </Fluent:RibbonGroupBox>
+                <Fluent:RibbonGroupBox Header="Anforderung">
+                    <Fluent:Button Header="Bearbeiten"
+                                   Icon="{StaticResource EditIcon}"
+                                   LargeIcon="{StaticResource EditIcon}"
+                                   Command="c:MainWindowCommand.EditSpecObject" />
+                    <Fluent:Button Header="Hinzufügen"
+                                   Icon="{StaticResource AddIcon}"
+                                   LargeIcon="{StaticResource AddIcon}"
+                                   Command="c:MainWindowCommand.AddSpecObject" />
+                </Fluent:RibbonGroupBox>
+            </Fluent:RibbonTabItem>
+        </Fluent:Ribbon>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0" x:Name="SidePanelColumn"/>
+                <ColumnDefinition Width="0" x:Name="SidePanelSeperatorColumn"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <!--Sidepanel-->
+            <Grid Grid.Column="0" Background="#FFE6E6E6" VerticalAlignment="Stretch">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="55"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Foreground="#FF3E5F8B" FontSize="24" FontFamily="Segoe UI Semilight" Margin="10">Navigation</TextBlock>
+                <Grid Grid.Row="1">
+                    <Button Width="20" Height="20" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0" BorderBrush="{x:Null}" Background="{x:Null}" Click="Button_SearchDocument_Click" Panel.ZIndex="1">
+                        <Image Source="{StaticResource SearchIcon}"/>
+                    </Button>
+                    <TextBox Name="SearchInputBox" Margin="10" HorizontalAlignment="Stretch" Padding="0,5,0,5"  Height="30" KeyUp="SearchInputBox_KeyUp"/>
+                </Grid>
+                <Button Width="30" Height="30" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10" BorderBrush="{x:Null}" Background="{x:Null}" Click="Button_NavigationClose_Click">
+                    <Image Margin="7" Source="{StaticResource CloseXIcon}"/>
+                </Button>
+                <TabControl Grid.Row="2" x:Name="NavigationTabControl" Background="{x:Null}" BorderBrush="{x:Null}" VerticalAlignment="Stretch">
+                    <TabControl.Resources>
+                        <Style TargetType="TabItem">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="TabItem">
+                                        <Grid Name="Panel">
+                                            <ContentPresenter x:Name="ContentSite"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center"
+                                                ContentSource="Header"
+                                                Margin="10,5"/>
+                                            <Rectangle x:Name="PanelUnderline" Width="100" Height="2" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="PanelUnderline" Property="Fill" Value="#FF3E5F8B" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="False">
+                                                <Setter TargetName="PanelUnderline" Property="Fill" Value="{x:Null}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TabControl.Resources>
+                    <!--Navigation Tab-->
+                    <TabItem Header="Überschriften" Background="{x:Null}" BorderBrush="{x:Null}" FontFamily="Segoe UI Semibold" Foreground="#FF2B579A">
+                        <TreeView x:Name="NavigationTreeView" Grid.Column="0" Width="Auto" VerticalAlignment="Stretch"
+                            ItemTemplate="{StaticResource ChildrenTemplate}" Background="{x:Null}" BorderBrush="{x:Null}"
+                            FontFamily="Segoe UI" FontSize="13">
+                            <TreeView.ItemContainerStyle>
+                                <Style TargetType="{x:Type TreeViewItem}">
+                                    <Setter Property="IsExpanded" Value="True" />
+                                    <EventSetter Event="PreviewMouseLeftButtonDown" Handler="NavigationTreeItem_Click" />
+                                </Style>
+                            </TreeView.ItemContainerStyle>
+                        </TreeView>
+                    </TabItem>
+                    <!--Search Tab-->
+                    <TabItem Header="Ergebnisse" Background="{x:Null}" BorderBrush="{x:Null}" FontFamily="Segoe UI Semibold" Foreground="#FF2B579A">
+                        <Grid>
+                            <TextBlock x:Name="SearchTabExplanation" Text="Mithilfe des Suchfelds können Sie das Dokument durchsuchen."
+                                       Margin="10,10,0,0" TextWrapping="Wrap" FontFamily="Segoe UI" FontSize="13" Foreground="#FF000000">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=SearchResultsLV, Path=HasItems}" Value="True">
+                                            <Setter Property="Visibility" Value="Hidden" />
+                                        </DataTrigger>
+                                            <DataTrigger Binding="{Binding ElementName=SearchResultsLV, Path=HasItems}" Value="False">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <ListView x:Name="SearchResultsLV" Background="{x:Null}" BorderBrush="{x:Null}" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Path=., Converter={StaticResource SearchResultObjectValueConverter}}" Margin="0,2,0,2" TextWrapping="Wrap" FontFamily="Segoe UI" FontSize="13"/>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <EventSetter Event="PreviewMouseLeftButtonDown" Handler="SearchResult_Click" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                            </ListView>
+                        </Grid>
+
+                    </TabItem>
+                </TabControl>
+            </Grid>
+            <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Stretch"/>
+            <DataGrid Grid.Column="2"
+                      x:Name="MainDataGrid"
+                      AutoGenerateColumns="False"
+                      SelectionMode="Single"
+                      CanUserAddRows="false">
+                <DataGrid.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" 
+                        Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" 
+                        Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}"/>
+                </DataGrid.Resources>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</Fluent:RibbonWindow>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This file is NOT compatible with Silverlight-->
+<Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Stretch="Uniform">
+  <Canvas Name="Ebene_1" Width="128" Height="128" Canvas.Left="0" Canvas.Top="0">
+    <Canvas.RenderTransform>
+      <TranslateTransform X="0" Y="0"/>
+    </Canvas.RenderTransform>
+    <Canvas.Resources/>
+    <!--Unknown tag: metadata-->
+    <!--Unknown tag: sodipodi:namedview-->
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="-14.459" Canvas.Top="53.725" Width="157.363" Height="21.744" Name="rect111" Fill="#FF777777">
+      <Rectangle.RenderTransform>
+        <MatrixTransform Matrix="0.7071 0.7071 -0.7071 0.7071 64.4873 -26.4919"/>
+      </Rectangle.RenderTransform>
+    </Rectangle>
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="-14.459" Canvas.Top="53.725" Width="157.363" Height="21.744" Name="rect113" Fill="#FF777777">
+      <Rectangle.RenderTransform>
+        <MatrixTransform Matrix="0.7071 -0.7071 0.7071 0.7071 -26.8669 64.332"/>
+      </Rectangle.RenderTransform>
+    </Rectangle>
+    <Canvas Name="g115"/>
+    <Canvas Name="g117"/>
+    <Canvas Name="g119"/>
+    <Canvas Name="g121"/>
+    <Canvas Name="g123"/>
+    <Canvas Name="g125"/>
+    <Canvas Name="g127"/>
+    <Canvas Name="g129"/>
+    <Canvas Name="g131"/>
+    <Canvas Name="g133"/>
+    <Canvas Name="g135"/>
+    <Canvas Name="g137"/>
+    <Canvas Name="g139"/>
+    <Canvas Name="g141"/>
+    <Canvas Name="g143"/>
+  </Canvas>
+</Viewbox>

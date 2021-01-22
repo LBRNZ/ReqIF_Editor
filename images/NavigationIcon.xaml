@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This file is NOT compatible with Silverlight-->
+<Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Stretch="Uniform">
+  <Canvas Name="Ebene_1" Width="128" Height="128" Canvas.Left="0" Canvas.Top="0">
+    <Canvas.RenderTransform>
+      <TranslateTransform X="0" Y="0"/>
+    </Canvas.RenderTransform>
+    <Canvas.Resources/>
+    <!--Unknown tag: metadata-->
+    <!--Unknown tag: sodipodi:namedview-->
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="24" Canvas.Top="22" Width="6" Height="89" Name="rect4028" Fill="#FF5C5958"/>
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="15" Canvas.Top="3" Width="24" Height="24" Name="rect4030" Fill="#FFE4AF2A"/>
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="15" Canvas.Top="35" Width="24" Height="24" Name="rect4032" Fill="#FFE4AF2A"/>
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="15" Canvas.Top="67" Width="24" Height="24" Name="rect4034" Fill="#FFE4AF2A"/>
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="15" Canvas.Top="99" Width="24" Height="24" Name="rect4036" Fill="#FFE4AF2A"/>
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="26" Canvas.Top="28" Width="44" Height="6" Name="rect4038" Fill="#FF5C5958"/>
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="64" Canvas.Top="28" Width="6" Height="89" Name="rect4040" Fill="#FF5C5958"/>
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="55" Canvas.Top="35" Width="24" Height="24" Name="rect4042" Fill="#FFE4AF2A"/>
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="55" Canvas.Top="67" Width="24" Height="24" Name="rect4044" Fill="#FFE4AF2A"/>
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="55" Canvas.Top="99" Width="24" Height="24" Name="rect4046" Fill="#FFE4AF2A"/>
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="65" Canvas.Top="92" Width="44" Height="6" Name="rect4048" Fill="#FF5C5958"/>
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="103" Canvas.Top="92" Width="6" Height="25" Name="rect4050" Fill="#FF5C5958"/>
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="94" Canvas.Top="99" Width="24" Height="24" Name="rect4052" Fill="#FFE4AF2A"/>
+    <Canvas Name="g4054"/>
+    <Canvas Name="g4056"/>
+    <Canvas Name="g4058"/>
+    <Canvas Name="g4060"/>
+    <Canvas Name="g4062"/>
+    <Canvas Name="g4064"/>
+    <Canvas Name="g4066"/>
+    <Canvas Name="g4068"/>
+    <Canvas Name="g4070"/>
+    <Canvas Name="g4072"/>
+    <Canvas Name="g4074"/>
+    <Canvas Name="g4076"/>
+    <Canvas Name="g4078"/>
+    <Canvas Name="g4080"/>
+    <Canvas Name="g4082"/>
+  </Canvas>
+</Viewbox>

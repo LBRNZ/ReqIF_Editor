@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This file is NOT compatible with Silverlight-->
+<Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Stretch="Uniform">
+  <Canvas Name="Ebene_1" Width="128" Height="128" Canvas.Left="0" Canvas.Top="0">
+    <Canvas.RenderTransform>
+      <TranslateTransform X="0" Y="0"/>
+    </Canvas.RenderTransform>
+    <Canvas.Resources/>
+    <!--Unknown tag: metadata-->
+    <!--Unknown tag: sodipodi:namedview-->
+    <Polygon xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Points="118,100 8,100 8,14 33.172,14 41.566,24 118,24 " Name="polygon51" FillRule="NonZero" Fill="#FFAB8320"/>
+    <Polygon xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Points="118,100 8,100 13,36 43.172,36 51.566,30 123,30 " Name="polygon53" FillRule="NonZero" Fill="#FFE4AF2A"/>
+    <Canvas Name="g55"/>
+    <Canvas Name="g57"/>
+    <Canvas Name="g59"/>
+    <Canvas Name="g61"/>
+    <Canvas Name="g63"/>
+    <Canvas Name="g65"/>
+    <Canvas Name="g67"/>
+    <Canvas Name="g69"/>
+    <Canvas Name="g71"/>
+    <Canvas Name="g73"/>
+    <Canvas Name="g75"/>
+    <Canvas Name="g77"/>
+    <Canvas Name="g79"/>
+    <Canvas Name="g81"/>
+    <Canvas Name="g83"/>
+  </Canvas>
+</Viewbox>

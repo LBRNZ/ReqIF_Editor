@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This file is NOT compatible with Silverlight-->
+<Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Stretch="Uniform">
+  <Canvas Name="Ebene_1" Width="128" Height="128" Canvas.Left="0" Canvas.Top="0">
+    <Canvas.RenderTransform>
+      <TranslateTransform X="0" Y="0"/>
+    </Canvas.RenderTransform>
+    <Canvas.Resources/>
+    <!--Unknown tag: metadata-->
+    <!--Unknown tag: sodipodi:namedview-->
+    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path4140" Fill="#FF5C5958" StrokeThickness="3" Stroke="#FF5C5958" StrokeMiterLimit="10">
+      <Path.Data>
+        <PathGeometry Figures="M48.549 4.356  c-23.618 0-42.764 19.146-42.764 42.764s19.146 42.763 42.764 42.763c23.618 0 42.764-19.146 42.764-42.763  S72.167 4.356 48.549 4.356z M48.549 82.869c-19.744 0-35.75-16.006-35.75-35.75c0-19.744 16.006-35.75 35.75-35.75  s35.75 16.006 35.75 35.75C84.299 66.863 68.293 82.869 48.549 82.869z" FillRule="NonZero"/>
+      </Path.Data>
+    </Path>
+    <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="63.219" Canvas.Top="92.834" Width="66.23" Height="8.001" Name="rect4142" Fill="#FF5C5958" StrokeThickness="3" Stroke="#FF5C5958" StrokeMiterLimit="10">
+      <Rectangle.RenderTransform>
+        <MatrixTransform Matrix="0.7071 0.7071 -0.7071 0.7071 96.688 -39.7566"/>
+      </Rectangle.RenderTransform>
+    </Rectangle>
+    <Canvas Name="g4144"/>
+    <Canvas Name="g4146"/>
+    <Canvas Name="g4148"/>
+    <Canvas Name="g4150"/>
+    <Canvas Name="g4152"/>
+    <Canvas Name="g4154"/>
+    <Canvas Name="g4156"/>
+    <Canvas Name="g4158"/>
+    <Canvas Name="g4160"/>
+    <Canvas Name="g4162"/>
+    <Canvas Name="g4164"/>
+    <Canvas Name="g4166"/>
+    <Canvas Name="g4168"/>
+    <Canvas Name="g4170"/>
+    <Canvas Name="g4172"/>
+  </Canvas>
+</Viewbox>
