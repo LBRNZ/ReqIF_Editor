@@ -224,18 +224,6 @@ namespace ReqIF_Editor
             }
         }
 
-        public SpecObject Add_SpecObject()
-        {
-            SpecObject specObject = new SpecObject()
-            {
-                Identifier = Guid.NewGuid().ToString(),
-                LastChange = DateTime.Now,
-                ReqIfContent = content,
-                SpecType = content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault()
-            };
-            content.SpecObjects.Add(specObject);
-            return specObject;
-        }
         public void Edit_SpecObject(SpecObject specObject, bool newSpecObject)
         {
             SpecObjectViewerWindow SpecObjectViewer = new SpecObjectViewerWindow(specObject, newSpecObject);

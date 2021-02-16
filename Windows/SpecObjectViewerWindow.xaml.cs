@@ -30,7 +30,8 @@ namespace ReqIF_Editor
         {
             if (_newSpecObject)
             {
-                (Application.Current.MainWindow as MainWindow).content.SpecObjects.Add(_specObject);
+                int currentIndex = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedIndex;
+                (Application.Current.MainWindow as MainWindow).content.SpecObjects.Insert(currentIndex + 1, _specObject);
             }
             for (int i = 0; i < DataTable.Items.Count; i++)
             {

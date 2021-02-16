@@ -8,7 +8,7 @@
         xmlns:c="clr-namespace:ReqIF_Editor.Commands"
         xmlns:properties="clr-namespace:ReqIF_Editor.Properties"
         mc:Ignorable="d"
-        Title="ReqIF Editor" Height="1080" Width="1920" WindowState="Maximized">
+        Title="ReqIF Editor" Height="768" Width="1024" WindowState="Maximized">
     <Window.Resources>
         <local:HierarchyObjectValueConverter x:Key="HierarchyObjectValueConverter"/>
         <local:SpecificationChildrenValueConverter x:Key="SpecificationChildrenValueConverter"/>

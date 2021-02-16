@@ -66,7 +66,7 @@ namespace ReqIF_Editor.Commands
 
 		public static void AddSpecObject_CanExecute(object sender, CanExecuteRoutedEventArgs e)
 		{
-			if ((sender as MainWindow).content != null)
+			if ((sender as MainWindow).MainDataGrid.SelectedItem != null)
 			{
 				e.CanExecute = true;
 			}
