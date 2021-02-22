@@ -64,7 +64,7 @@ namespace ReqIF_Editor.Commands
 
 		}
 
-		public static void AddSpecObject_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+		public static void AddSpecObjectAfter_CanExecute(object sender, CanExecuteRoutedEventArgs e)
 		{
 			if ((sender as MainWindow).MainDataGrid.SelectedItem != null)
 			{
@@ -76,16 +76,26 @@ namespace ReqIF_Editor.Commands
 			}
 		}
 
-		public static void AddSpecObject_Executed(object sender, ExecutedRoutedEventArgs e)
+		public static void AddSpecObjectUnder_CanExecute(object sender, CanExecuteRoutedEventArgs e)
 		{
-			SpecObject specObject = new SpecObject()
+			if ((sender as MainWindow).MainDataGrid.SelectedItem != null)
 			{
-				Identifier = Guid.NewGuid().ToString(),
-				LastChange = DateTime.Now,
-				ReqIfContent = (sender as MainWindow).content,
-				SpecType = (sender as MainWindow).content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault()
-			};
-			(sender as MainWindow).Edit_SpecObject(specObject, true);
+				e.CanExecute = true;
+			}
+			else
+			{
+				e.CanExecute = false;
+			}
+		}
+
+		public static void AddSpecObjectAfter_Executed(object sender, ExecutedRoutedEventArgs e)
+		{
+			(sender as MainWindow).Add_SpecObject("after");
+		}
+
+		public static void AddSpecObjectUnder_Executed(object sender, ExecutedRoutedEventArgs e)
+		{
+			(sender as MainWindow).Add_SpecObject("under");
 		}
 
 		public static void CloseFile_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -132,7 +142,9 @@ namespace ReqIF_Editor.Commands
 			window.CommandBindings.Add(
 				new CommandBinding(MainWindowCommand.EditSpecObject, EditSpecObject_Executed, EditSpecObject_CanExecute));
 			window.CommandBindings.Add(
-				new CommandBinding(MainWindowCommand.AddSpecObject, AddSpecObject_Executed, AddSpecObject_CanExecute));
+				new CommandBinding(MainWindowCommand.AddSpecObjectAfter, AddSpecObjectAfter_Executed, AddSpecObjectAfter_CanExecute));
+			window.CommandBindings.Add(
+				new CommandBinding(MainWindowCommand.AddSpecObjectUnder, AddSpecObjectUnder_Executed, AddSpecObjectUnder_CanExecute));
 			window.CommandBindings.Add(
 				new CommandBinding(MainWindowCommand.CloseFile, CloseFile_Executed, CloseFile_CanExecute));
 			window.CommandBindings.Add(
@@ -163,7 +175,13 @@ namespace ReqIF_Editor.Commands
 				"EditSpecObject",
 				typeof(MainWindowCommand)
 			);
-		public static readonly RoutedUICommand AddSpecObject = new RoutedUICommand
+		public static readonly RoutedUICommand AddSpecObjectAfter = new RoutedUICommand
+			(
+				"AddSpecObject",
+				"AddSpecObject",
+				typeof(MainWindowCommand)
+			);
+		public static readonly RoutedUICommand AddSpecObjectUnder = new RoutedUICommand
 			(
 				"AddSpecObject",
 				"AddSpecObject",

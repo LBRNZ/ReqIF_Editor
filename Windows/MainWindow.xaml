@@ -142,10 +142,14 @@
                                    Icon="{StaticResource EditIcon}"
                                    LargeIcon="{StaticResource EditIcon}"
                                    Command="c:MainWindowCommand.EditSpecObject" />
-                    <Fluent:Button Header="Hinzufügen"
-                                   Icon="{StaticResource AddIcon}"
-                                   LargeIcon="{StaticResource AddIcon}"
-                                   Command="c:MainWindowCommand.AddSpecObject" />
+                    <Fluent:Button Header="Danach Hinzufügen"
+                                   Icon="{StaticResource AddAfterIcon}"
+                                   LargeIcon="{StaticResource AddAfterIcon}"
+                                   Command="c:MainWindowCommand.AddSpecObjectAfter" />
+                    <Fluent:Button Header="Darunter Hinzufügen"
+                                   Icon="{StaticResource AddUnderIcon}"
+                                   LargeIcon="{StaticResource AddUnderIcon}"
+                                   Command="c:MainWindowCommand.AddSpecObjectUnder" />
                 </Fluent:RibbonGroupBox>
             </Fluent:RibbonTabItem>
         </Fluent:Ribbon>

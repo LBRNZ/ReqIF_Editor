@@ -225,9 +225,21 @@ namespace ReqIF_Editor
             }
         }
 
-        public void Edit_SpecObject(SpecObject specObject, bool newSpecObject)
+        public void Add_SpecObject(string position)
         {
-            SpecObjectViewerWindow SpecObjectViewer = new SpecObjectViewerWindow(specObject, newSpecObject);
+            SpecObject specObject = new SpecObject()
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                LastChange = DateTime.Now,
+                ReqIfContent = content,
+                SpecType = content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault()
+            };
+            Edit_SpecObject(specObject, true, position);
+        }
+
+        public void Edit_SpecObject(SpecObject specObject, bool newSpecObject, string position = null)
+        {
+            SpecObjectViewerWindow SpecObjectViewer = new SpecObjectViewerWindow(specObject, newSpecObject, position);
             SpecObjectViewer.Owner = Window.GetWindow(this);
             SpecObjectViewer.Show();
         }

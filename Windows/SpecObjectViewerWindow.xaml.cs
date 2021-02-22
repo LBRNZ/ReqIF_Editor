@@ -17,13 +17,14 @@ namespace ReqIF_Editor
     {
         private bool _newSpecObject;
         private SpecObject _specObject;
-        public SpecObjectViewerWindow(SpecObject specObject, bool newSpecObject)
+        private string _position;
+        public SpecObjectViewerWindow(SpecObject specObject, bool newSpecObject, string position)
         {
             InitializeComponent();
             DataTable.ItemsSource = specObject.Values;
             _newSpecObject = newSpecObject;
             _specObject = specObject;
-
+            _position = position;
         }
 
 
@@ -37,14 +38,26 @@ namespace ReqIF_Editor
                 //Add SpecObject to SpecHierarchy
                 SpecHierarchy specHierarchy = specifications.First().Children.First().Descendants()
                     .Where(node => node.Object == currentObject).First();
-                SpecHierarchy parentSpecHierarchy = specifications.First().Children.First().Descendants()
-                    .Where(node => node.Children.Contains(specHierarchy)).First();
-                int specHierarchyIndex = parentSpecHierarchy.Children.IndexOf(specHierarchy);
-                parentSpecHierarchy.Children.Insert(specHierarchyIndex + 1, new SpecHierarchy() {
-                    Object = _specObject,
-                    Identifier = Guid.NewGuid().ToString(),
-                    LastChange = DateTime.Now
-                });
+                if (_position == "after")
+                {
+                    SpecHierarchy parentSpecHierarchy = specifications.First().Children.First().Descendants()
+                        .Where(node => node.Children.Contains(specHierarchy)).First();
+                    int specHierarchyIndex = parentSpecHierarchy.Children.IndexOf(specHierarchy);
+                    parentSpecHierarchy.Children.Insert(specHierarchyIndex + 1, new SpecHierarchy() {
+                        Object = _specObject,
+                        Identifier = Guid.NewGuid().ToString(),
+                        LastChange = DateTime.Now
+                    });
+                } else if(_position == "under")
+                {
+                    specHierarchy.Children.Insert(0, new SpecHierarchy()
+                    {
+                        Object = _specObject,
+                        Identifier = Guid.NewGuid().ToString(),
+                        LastChange = DateTime.Now
+                    });
+                }
+
                 //Add SpecObject to SpecObjects
                 (Application.Current.MainWindow as MainWindow).content.SpecObjects.Insert(currentIndex + 1, _specObject);
 
