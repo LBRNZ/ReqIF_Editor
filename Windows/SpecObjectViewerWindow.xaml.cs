@@ -26,12 +26,28 @@ namespace ReqIF_Editor
 
         }
 
+
         private void SaveSpecObject_Button_Click(object sender, RoutedEventArgs e)
         {
             if (_newSpecObject)
             {
                 int currentIndex = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedIndex;
+                SpecObject currentObject = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedItem as SpecObject;
+                var specifications = (Application.Current.MainWindow as MainWindow).content.Specifications;
+                //Add SpecObject to SpecHierarchy
+                SpecHierarchy specHierarchy = specifications.First().Children.First().Descendants()
+                    .Where(node => node.Object == currentObject).First();
+                SpecHierarchy parentSpecHierarchy = specifications.First().Children.First().Descendants()
+                    .Where(node => node.Children.Contains(specHierarchy)).First();
+                int specHierarchyIndex = parentSpecHierarchy.Children.IndexOf(specHierarchy);
+                parentSpecHierarchy.Children.Insert(specHierarchyIndex + 1, new SpecHierarchy() {
+                    Object = _specObject,
+                    Identifier = Guid.NewGuid().ToString(),
+                    LastChange = DateTime.Now
+                });
+                //Add SpecObject to SpecObjects
                 (Application.Current.MainWindow as MainWindow).content.SpecObjects.Insert(currentIndex + 1, _specObject);
+
             }
             for (int i = 0; i < DataTable.Items.Count; i++)
             {
@@ -103,6 +119,20 @@ namespace ReqIF_Editor
                 attributeValue.AttributeDefinition = selectedAttribute;
                 _specObject.Values.Add(attributeValue);
                 DataTable.Items.Refresh();
+            }
+        }
+
+    }
+    public static class MyExtensions
+    {
+        public static IEnumerable<SpecHierarchy> Descendants(this SpecHierarchy root)
+        {
+            var nodes = new Stack<SpecHierarchy>(new[] { root });
+            while (nodes.Any())
+            {
+                SpecHierarchy node = nodes.Pop();
+                yield return node;
+                foreach (var n in node.Children) nodes.Push(n);
             }
         }
     }
