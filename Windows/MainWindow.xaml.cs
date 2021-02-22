@@ -57,6 +57,7 @@ namespace ReqIF_Editor
             embeddedObjects = reqif.EmbeddedObjects;
             content.SpecObjects.CollectionChanged += SpecObjects_CollectionChanged;
 
+            PropertyGrid.DataContext = header;
             initializeColumns();
         }
 

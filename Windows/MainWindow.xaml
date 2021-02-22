@@ -17,6 +17,9 @@
                               ItemsSource="{Binding Path=Children, Converter={StaticResource SpecificationChildrenValueConverter}}">
             <TextBlock Text="{Binding Path=Object, Converter={StaticResource HierarchyObjectValueConverter}}" Foreground="#FF3C3C3C" Padding="0,2,0,2"/>
         </HierarchicalDataTemplate>
+        <Style x:Key="PropertyNameStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+        </Style>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -38,6 +41,46 @@
                                                  IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=overrideReqifRights, Mode=TwoWay}"
                                                  FontSize="16"/>
                                 <TextBlock Text="Beim Bearbeiten von Attributwerten wird die Einschränkung von Schreibrechten im Dokument ignoriert. Alle Attributwerte können bearbeitet werden."/>
+                            </WrapPanel>
+                        </Fluent:BackstageTabItem>
+                        <Fluent:BackstageTabItem Header="Eigenschaften">
+                            <WrapPanel Orientation="Vertical" Margin="30">
+                                <TextBlock Text="Eigenschaften" FontSize="34"/>
+                                <Grid Width="800" Name="PropertyGrid" Margin="0,20,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="30" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Column="0" Grid.Row="0" Text="Kommentar" Style="{StaticResource PropertyNameStyle}"/>
+                                    <TextBlock Grid.Column="0" Grid.Row="1" Text="Erstellungsdatum" Style="{StaticResource PropertyNameStyle}"/>
+                                    <TextBlock Grid.Column="0" Grid.Row="2" Text="Identifier" Style="{StaticResource PropertyNameStyle}"/>
+                                    <TextBlock Grid.Column="0" Grid.Row="3" Text="Repository ID" Style="{StaticResource PropertyNameStyle}"/>
+                                    <TextBlock Grid.Column="0" Grid.Row="4" Text="ReqIFTool ID" Style="{StaticResource PropertyNameStyle}"/>
+                                    <TextBlock Grid.Column="0" Grid.Row="5" Text="ReqIF Version" Style="{StaticResource PropertyNameStyle}"/>
+                                    <TextBlock Grid.Column="0" Grid.Row="6" Text="Quell Tool ID" Style="{StaticResource PropertyNameStyle}"/>
+                                    <TextBlock Grid.Column="0" Grid.Row="7" Text="Titel" Style="{StaticResource PropertyNameStyle}"/>
+                                    
+                                    <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding Comment}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding CreationTime}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding Identifier}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="3" Text="{Binding RepositoryId}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="4" Text="{Binding ReqIFToolId}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="5" Text="{Binding ReqIFVersion}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="6" Text="{Binding SourceToolId}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="7" Text="{Binding Title}"/>
+                                </Grid>
+
                             </WrapPanel>
                         </Fluent:BackstageTabItem>
                         <Fluent:BackstageTabItem Header="Über">
