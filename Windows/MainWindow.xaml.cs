@@ -274,11 +274,11 @@ namespace ReqIF_Editor
             {
                 if((sender as SidePanel).Expanded)
                 {
-                    AnimationHelper.AnimateGridColumnExpandCollapse(SidePanelColumn, true, 300, 0, 0, new TimeSpan(0, 0, 0, 0, 300));
+                    AnimationHelper.AnimateGridColumnExpandCollapse(SidePanelColumn, true, 300, 0, 200, new TimeSpan(0, 0, 0, 0, 200));
                     SidePanelSeperatorColumn.Width = new GridLength(5);
                 } else
                 {
-                    AnimationHelper.AnimateGridColumnExpandCollapse(SidePanelColumn, false, 300, 0, 0, new TimeSpan(0, 0, 0, 0, 300));
+                    AnimationHelper.AnimateGridColumnExpandCollapse(SidePanelColumn, false, 300, 0, 0, new TimeSpan(0, 0, 0, 0, 200));
                     SidePanelSeperatorColumn.Width = new GridLength(0);
                 }
             }

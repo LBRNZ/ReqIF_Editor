@@ -39,7 +39,7 @@ namespace ReqIF_Editor
         /// </summary>
         public static readonly DependencyProperty DurationProperty =
           DependencyProperty.RegisterAttached("Duration", typeof(TimeSpan), typeof(GridAnimationBehavior),
-            new FrameworkPropertyMetadata(TimeSpan.FromMilliseconds(300)));
+            new FrameworkPropertyMetadata(TimeSpan.FromMilliseconds(200)));
 
         public static void SetDuration(DependencyObject dependencyObject, TimeSpan value)
         {
@@ -285,10 +285,10 @@ namespace ReqIF_Editor
 
             if (fromVal > toVal)
             {
-                return new GridLength((1 - animationClock.CurrentProgress.Value) * (fromVal - toVal) + toVal, GridUnitType.Star);
+                return new GridLength((1 - animationClock.CurrentProgress.Value) * (fromVal - toVal) + toVal, GridUnitType.Pixel);
             }
             else
-                return new GridLength(animationClock.CurrentProgress.Value * (toVal - fromVal) + fromVal, GridUnitType.Star);
+                return new GridLength(animationClock.CurrentProgress.Value * (toVal - fromVal) + fromVal, GridUnitType.Pixel);
         }
     }
 }
