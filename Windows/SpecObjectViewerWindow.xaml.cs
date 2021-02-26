@@ -32,23 +32,27 @@ namespace ReqIF_Editor
         {
             if (_newSpecObject)
             {
-                int currentIndex = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedIndex;
+                int currentIndex = 0;
                 SpecObject currentObject = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedItem as SpecObject;
                 var specifications = (Application.Current.MainWindow as MainWindow).content.Specifications;
-                //Add SpecObject to SpecHierarchy
+
+                //Add SpecObject to SpecHierarchy and to SpecObjects
                 SpecHierarchy specHierarchy = specifications.First().Children.First().Descendants()
                     .Where(node => node.Object == currentObject).First();
                 if (_position == "after")
                 {
-                    SpecHierarchy parentSpecHierarchy = specifications.First().Children.First().Descendants()
-                        .Where(node => node.Children.Contains(specHierarchy)).First();
+                    SpecHierarchy parentSpecHierarchy = specHierarchy.Container;
                     int specHierarchyIndex = parentSpecHierarchy.Children.IndexOf(specHierarchy);
-                    parentSpecHierarchy.Children.Insert(specHierarchyIndex + 1, new SpecHierarchy() {
+                    parentSpecHierarchy.Children.Insert(specHierarchyIndex + 1, new SpecHierarchy()
+                    {
                         Object = _specObject,
                         Identifier = Guid.NewGuid().ToString(),
                         LastChange = DateTime.Now
                     });
-                } else if(_position == "under")
+                    var previousObject = specHierarchy.Descendants().Last().Object;
+                    currentIndex = (Application.Current.MainWindow as MainWindow).content.SpecObjects.IndexOf(previousObject);
+                }
+                else if (_position == "under")
                 {
                     specHierarchy.Children.Insert(0, new SpecHierarchy()
                     {
@@ -56,12 +60,12 @@ namespace ReqIF_Editor
                         Identifier = Guid.NewGuid().ToString(),
                         LastChange = DateTime.Now
                     });
+                    currentIndex = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedIndex;
+                    
                 }
-
-                //Add SpecObject to SpecObjects
                 (Application.Current.MainWindow as MainWindow).content.SpecObjects.Insert(currentIndex + 1, _specObject);
-
             }
+
             for (int i = 0; i < DataTable.Items.Count; i++)
             {
                 DataGridRow row = DataTable.ItemContainerGenerator.ContainerFromIndex(i) as DataGridRow;
@@ -145,7 +149,11 @@ namespace ReqIF_Editor
             {
                 SpecHierarchy node = nodes.Pop();
                 yield return node;
-                foreach (var n in node.Children) nodes.Push(n);
+                for (int i = node.Children.Count - 1; i >= 0; i--)
+                {
+                    nodes.Push(node.Children[i]);
+                }
+
             }
         }
     }
