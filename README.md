@@ -4,7 +4,12 @@ Reqif Editor is a tool to open and edit .reqif and .reqifz files.
 * Open reqif and reqifz files and display content including preview images of embedded objects
 * Edit existing SpecObjects
 * Add new SpecObjects
-* Add Attributes to SepcObjects
+* Add existing Attributes to SepcObjects
+
+## Limitations
+* Embedded Objects can currently not be added or edited
+* Headings are not styled differnt then reqiurements
+* SpecObjetcs can not be deleted
 
 ## Preview
 ![](README/MainWindow.png?raw=true)
