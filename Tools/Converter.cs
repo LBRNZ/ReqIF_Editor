@@ -5,7 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Xml;
 using System.Xml.Linq;
@@ -51,7 +53,7 @@ namespace ReqIF_Editor
         private string transformXHTML(string input, string xsltSource)
         {
             var assembly = Assembly.GetExecutingAssembly();
-            XslTransform xslt = new XslTransform();
+            XslCompiledTransform xslt = new XslCompiledTransform();
             xslt.Load(XmlReader.Create(assembly.GetManifestResourceStream(xsltSource)));
             using (MemoryStream msInput = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(input)))
             {
@@ -89,6 +91,10 @@ namespace ReqIF_Editor
             if (value.GetType() == typeof(string))
             {
                 string html = (string)value;
+                //Change Html Tags to lower case
+                html = Regex.Replace(html, "<([^>]*)>", m => "<" + m.Groups[1].Value.ToLower() + ">");
+                //Replace <br> with <br />
+                html = Regex.Replace(html, "<(br[^>]*)>", "<br />");
                 string addNamespace = transformXHTML(html, "ReqIF_Editor.XSLT.AddNamespace.xslt");
                 string ImgToObject = transformXHTML(addNamespace, "ReqIF_Editor.XSLT.ImgToObject.xslt");
                 return ImgToObject;
@@ -99,20 +105,29 @@ namespace ReqIF_Editor
         private string transformXHTML(string input, string xsltSource)
         {
             var assembly = Assembly.GetExecutingAssembly();
-            XslTransform xslt = new XslTransform();
+            XslCompiledTransform xslt = new XslCompiledTransform();
             xslt.Load(XmlReader.Create(assembly.GetManifestResourceStream(xsltSource)));
             using (MemoryStream msInput = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(input)))
             {
-                XPathDocument xpathdocument = new XPathDocument(msInput);
-                using (MemoryStream ms = new MemoryStream())
+                try
                 {
-                    using (XmlTextWriter writer = new XmlTextWriter(ms, new UTF8Encoding(false)))
+                    XPathDocument xpathdocument = new XPathDocument(msInput);
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        writer.Formatting = Formatting.Indented;
+                        using (XmlTextWriter writer = new XmlTextWriter(ms, new UTF8Encoding(false)))
+                        {
+                            writer.Formatting = Formatting.Indented;
 
-                        xslt.Transform(xpathdocument, null, writer, null);
+                            xslt.Transform(xpathdocument, null, writer, null);
+                        }
+                        return Encoding.UTF8.GetString(ms.ToArray());
                     }
-                    return Encoding.UTF8.GetString(ms.ToArray());
+                }
+                catch (System.Xml.XmlException e)
+                {
+                    MessageBox.Show(e.Message, "Fehler in XHTML",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return input;
                 }
             }
         }
