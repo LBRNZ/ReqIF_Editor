@@ -66,7 +66,7 @@
     <Reference Include="Fluent, Version=8.0.0.0, Culture=neutral, PublicKeyToken=3e436e32a8c5546f, processorArchitecture=MSIL">
       <HintPath>packages\Fluent.Ribbon.8.0.3\lib\net462\Fluent.dll</HintPath>
     </Reference>
-	<Reference Include="HtmlEditorWPF, Version=1.2.0.0, Culture=neutral, processorArchitecture=x86">
+    <Reference Include="HtmlEditorWPF, Version=1.2.0.0, Culture=neutral, processorArchitecture=x86">
       <HintPath>packages\HtmlEditorWPF.1.2.0\lib\net472\HtmlEditorWPF.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -109,6 +109,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Settings.cs" />
     <Compile Include="Windows\SelectAttributeDialogWindow.xaml.cs">
       <DependentUpon>SelectAttributeDialogWindow.xaml</DependentUpon>
     </Compile>
