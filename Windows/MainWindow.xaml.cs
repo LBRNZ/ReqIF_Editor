@@ -302,7 +302,8 @@ namespace ReqIF_Editor
                 return memoryStream;
             } else
             {
-                return null;
+                Properties.Resources.Document_notFound.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
+                return memoryStream;
             }
         }
     }
