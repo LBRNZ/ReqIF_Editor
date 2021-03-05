@@ -23,12 +23,12 @@
         <StackPanel Grid.Row="1"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
-            <Button Content="Abbrechen"
+            <Button Content="{DynamicResource cancel}"
                     IsCancel="True"
                     Width="70"
                     Margin="10,10"
                     Click="Cancel_Button_Click"/>
-            <Button Content="OK"
+            <Button Content="{DynamicResource ok}"
                     IsDefault="True"
                     Width="70"
                     Margin="10,10"

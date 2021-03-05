@@ -89,7 +89,7 @@ namespace ReqIF_Editor
 
         private void AddSpecObjectButton_Click(object sender, RoutedEventArgs e)
         {
-            string title = "Attribut wählen";
+            string title = (string)FindResource("selectAttribute");
             List<AttributeDefinition> atrDef = (Application.Current.MainWindow as MainWindow).content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault().SpecAttributes;
             SelectAttributeDialogWindow cdw = new SelectAttributeDialogWindow(atrDef, title);
             cdw.Owner = this;

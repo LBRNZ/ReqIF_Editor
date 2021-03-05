@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -32,6 +33,7 @@ namespace ReqIF_Editor
         public MainWindow()
         {
             InitializeComponent();
+            SetLanguageDictionary();
             Loaded += new RoutedEventHandler(MainWindow_Loaded);
             Sidepanel.PropertyChanged += SidePanel_PropertyChanged;
 
@@ -134,7 +136,7 @@ namespace ReqIF_Editor
             {
                 DataGridTemplateColumn col = new DataGridTemplateColumn();
                 FrameworkElementFactory factory = null;
-                col.Header = "Anforderung";
+                col.Header = FindResource("requirement");
                 MultiBinding mb = new MultiBinding()
                 {
                     Mode = BindingMode.OneWay,
@@ -287,6 +289,30 @@ namespace ReqIF_Editor
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
             System.Diagnostics.Process.Start(e.Uri.ToString());
+        }
+        private void SetLanguageDictionary()
+        {
+            ResourceDictionary dict = new ResourceDictionary();
+            switch (Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName.ToString())
+            {
+                case "en":
+                    dict.Source = new Uri("..\\Resources\\en.xaml", UriKind.Relative);
+                    RibbonLocalization.Current.Culture = new System.Globalization.CultureInfo("en");
+                    break;
+                case "de":
+                    dict.Source = new Uri("..\\Resources\\de.xaml", UriKind.Relative);
+                    RibbonLocalization.Current.Culture = new System.Globalization.CultureInfo("de");
+                    break;
+                case "es":
+                    dict.Source = new Uri("..\\Resources\\es.xaml", UriKind.Relative);
+                    RibbonLocalization.Current.Culture = new System.Globalization.CultureInfo("es");
+                    break;
+                default:
+                    dict.Source = new Uri("..\\Resources\\en.xaml", UriKind.Relative);
+                    RibbonLocalization.Current.Culture = new System.Globalization.CultureInfo("en");
+                    break;
+            }
+            Application.Current.Resources.MergedDictionaries.Add(dict);
         }
     }
 

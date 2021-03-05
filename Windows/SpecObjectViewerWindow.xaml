@@ -8,7 +8,7 @@
         xmlns:smith="clr-namespace:Smith.WPF.HtmlEditor;assembly=HtmlEditorWPF"
         xmlns:wpftool="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Anforderung bearbeiten" Height="650" MinWidth="835" Width="835" WindowStartupLocation="CenterOwner">
+        Title="{DynamicResource editRequirement}" Height="650" MinWidth="835" Width="835" WindowStartupLocation="CenterOwner">
     <Window.Resources>
         <local:XHTMLConverter x:Key="XHTMLConverter"/>
         <local:AttributeEditableConverter x:Key="AttributeEditableConverter"/>
@@ -24,7 +24,7 @@
                   HorizontalGridLinesBrush="Gray"
                   VerticalGridLinesBrush="Gray">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Attribute" Binding="{Binding AttributeDefinition.LongName}" FontSize="14" IsReadOnly="True">
+                <DataGridTextColumn Header="{DynamicResource attributes}" Binding="{Binding AttributeDefinition.LongName}" FontSize="14" IsReadOnly="True">
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="DataGridCell">
                             <Setter Property="Background" Value="LightGray"/>
@@ -39,7 +39,7 @@
                         </Style>
                     </DataGridTextColumn.CellStyle>
                 </DataGridTextColumn>
-                <DataGridTemplateColumn Header="Werte">
+                <DataGridTemplateColumn Header="{DynamicResource values}">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <ContentPresenter Content="{Binding Path=.}">
@@ -47,7 +47,9 @@
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueXHTML}">
                                         <smith:HtmlEditor HorizontalAlignment="Left" 
                                                           BindingContent="{Binding ObjectValue, Converter={StaticResource XHTMLConverter}, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
-                                                          IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"/>
+                                                          IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"
+                                                          FontFamilyListVisibility="Collapsed"
+                                                          FontSizeListVisibility="Collapsed"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueEnumeration}">
                                         <ListBox HorizontalAlignment="Left"
@@ -120,11 +122,11 @@
                     DockPanel.Dock="Left">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="{StaticResource PlusIcon}" Margin="0,0,5,0"/>
-                    <TextBlock>Attribut hinzufügen</TextBlock>
+                    <TextBlock Text="{DynamicResource addAttribute}"/>
                 </StackPanel>
             </Button>
             <Button x:Name="SaveSpecObject_Button"
-                    Content="Speichern"
+                    Content="{DynamicResource save}"
                     Height="30"
                     Margin="5"
                     Padding="5"
@@ -132,7 +134,7 @@
                     IsDefault="True"
                     DockPanel.Dock="Right"/>
             <Button x:Name="CancelSpecObject_Button"
-                    Content="Abbrechen"
+                    Content="{DynamicResource cancel}"
                     Height="30"
                     Margin="5"
                     Padding="5"
