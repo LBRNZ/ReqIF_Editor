@@ -206,6 +206,7 @@ namespace ReqIF_Editor
                 {
                     factory = new FrameworkElementFactory(typeof(Html));
                     dp = Html.HtmlProperty;
+                    col.Width = 500;
                 }
                 else if (typeOfDataType == typeof(DatatypeDefinitionDate))
                 {
