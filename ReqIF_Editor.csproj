@@ -218,7 +218,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="smithhtmleditor.config.xml" />
-    <Content Include="smithhtmleditor.stylesheet.css" />
+    <Content Include="smithhtmleditor.stylesheet.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="MSHTML">
