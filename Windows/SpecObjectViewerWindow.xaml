@@ -39,7 +39,7 @@
                         </Style>
                     </DataGridTextColumn.CellStyle>
                 </DataGridTextColumn>
-                <DataGridTemplateColumn Header="{DynamicResource values}">
+                <DataGridTemplateColumn Header="{DynamicResource values}" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <ContentPresenter Content="{Binding Path=.}">
@@ -49,7 +49,8 @@
                                                           BindingContent="{Binding ObjectValue, Converter={StaticResource XHTMLConverter}, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
                                                           IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"
                                                           FontFamilyListVisibility="Collapsed"
-                                                          FontSizeListVisibility="Collapsed"/>
+                                                          FontSizeListVisibility="Collapsed" Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ActualWidth}">
+                                        </smith:HtmlEditor>
                                     </DataTemplate>
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueEnumeration}">
                                         <ListBox HorizontalAlignment="Left"
