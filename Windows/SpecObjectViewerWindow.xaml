@@ -15,11 +15,35 @@
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
+        <Expander Grid.Row="0" Name="InfoExpander">
+            <Expander.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Identifier: " FontWeight="Bold"/>
+                    <TextBlock Text="{Binding Identifier}"/>
+                </StackPanel>
+            </Expander.Header>
+            <StackPanel Margin="25,0,0,0">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Description: " FontWeight="Bold"/>
+                    <TextBlock Text="{Binding Description}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="LastChange: " FontWeight="Bold"/>
+                    <TextBlock Text="{Binding LastChange}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="LongName: " FontWeight="Bold"/>
+                    <TextBlock Text="{Binding LongName}"/>
+                </StackPanel>
+            </StackPanel>
+
+        </Expander>
         <DataGrid x:Name="DataTable"
-                  Grid.Row="0"
+                  Grid.Row="1"
                   AutoGenerateColumns="False"
                   HorizontalGridLinesBrush="Gray"
                   VerticalGridLinesBrush="Gray">
@@ -114,7 +138,7 @@
                 </Style> 
             </DataGrid.Resources>
         </DataGrid>
-        <DockPanel Grid.Row="1" LastChildFill="False">
+        <DockPanel Grid.Row="2" LastChildFill="False">
             <Button x:Name="AddSpecObject_Button"
                     Height="30"
                     Margin="5"

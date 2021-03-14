@@ -22,6 +22,7 @@ namespace ReqIF_Editor
         {
             InitializeComponent();
             DataTable.ItemsSource = specObject.Values;
+            InfoExpander.DataContext = specObject;
             _newSpecObject = newSpecObject;
             _specObject = specObject;
             _position = position;
