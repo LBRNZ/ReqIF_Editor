@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -135,33 +136,9 @@ namespace ReqIF_Editor
             if (chapterNameExists && textExists)
             {
                 DataGridTemplateColumn col = new DataGridTemplateColumn();
-                FrameworkElementFactory factory = null;
                 col.Header = FindResource("requirement");
-                MultiBinding mb = new MultiBinding()
-                {
-                    Mode = BindingMode.OneWay,
-                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                };
-                mb.Converter = new TextAndChapterNameConverter();
 
-                Binding chapterNameBinding = new Binding("Values")
-                {
-                    Converter = new SpecObjectValueConverter(content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault().SpecAttributes.Where(x => x.LongName == "ReqIF.ChapterName").FirstOrDefault().Identifier)
-                };
-
-                Binding textBinding = new Binding("Values")
-                {
-                    Converter = new SpecObjectValueConverter(content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault().SpecAttributes.Where(x => x.LongName == "ReqIF.Text").FirstOrDefault().Identifier)
-                };
-
-                mb.Bindings.Add(chapterNameBinding);
-                mb.Bindings.Add(textBinding);
-                factory = new FrameworkElementFactory(typeof(Html));
-                factory.SetBinding(Html.HtmlProperty, mb);
-                //factory.SetValue(Html.FontSizePropertyProperty, 20D);
-                DataTemplate cellTemplate = new DataTemplate();
-                cellTemplate.VisualTree = factory;
-                col.CellTemplate = cellTemplate;
+                col.CellTemplateSelector = new HtmlCellTemplateSelector();
                 col.Width = 500;
                 MainDataGrid.Columns.Add(col);
             }
@@ -319,6 +296,16 @@ namespace ReqIF_Editor
 
     class Html : TinyHtml.Wpf.WpfHtmlControl
     {
+        public Html()
+        {
+            using (var s = Assembly.GetExecutingAssembly().GetManifestResourceStream("ReqIF_Editor.Resources.text.css"))
+            {
+                using (StreamReader reader = new StreamReader(s))
+                {
+                    SetMasterStylesheet(reader.ReadToEnd());
+                }
+            }
+        }
         protected override Stream OnLoadResource(string url)
         {
             MemoryStream memoryStream = new MemoryStream();
@@ -334,6 +321,62 @@ namespace ReqIF_Editor
             }
         }
     }
+
+    class HtmlHeading : TinyHtml.Wpf.WpfHtmlControl
+    {
+        public HtmlHeading()
+        {
+            using (var s = Assembly.GetExecutingAssembly().GetManifestResourceStream("ReqIF_Editor.Resources.heading.css"))
+            {
+                using (StreamReader reader = new StreamReader(s))
+                {
+                    SetMasterStylesheet(reader.ReadToEnd());
+                }
+            }
+        }
+    }
+
+    public class HtmlCellTemplateSelector : DataTemplateSelector
+    {
+
+        public override DataTemplate SelectTemplate(object item, System.Windows.DependencyObject container)
+        {
+            ContentPresenter presenter = container as ContentPresenter;
+            DataGridCell cell = presenter.Parent as DataGridCell;
+
+            if ((cell.DataContext as SpecObject).Values.Where(x => x.AttributeDefinition.LongName == "ReqIF.ChapterName").Any())
+            {
+                Binding binding = new Binding("Values")
+                {
+                    Converter = new SpecObjectValueConverter((cell.DataContext as SpecObject).SpecType.SpecAttributes.Where(x => x.LongName == "ReqIF.ChapterName").FirstOrDefault().Identifier)
+                };
+                var factory = new FrameworkElementFactory(typeof(HtmlHeading));
+                factory.SetBinding(HtmlHeading.HtmlProperty, binding);
+
+                DataTemplate cellTemplate = new DataTemplate()
+                {
+                    VisualTree = factory
+                };
+                return cellTemplate;
+            } else {
+                Binding binding = new Binding("Values")
+                {
+                    Converter = new SpecObjectValueConverter((cell.DataContext as SpecObject).SpecType.SpecAttributes.Where(x => x.LongName == "ReqIF.Text").FirstOrDefault().Identifier)
+                };
+                var factory = new FrameworkElementFactory(typeof(Html));
+                factory.SetBinding(Html.HtmlProperty, binding);
+
+                DataTemplate cellTemplate = new DataTemplate()
+                {
+                    VisualTree = factory
+                };
+                return cellTemplate;
+            }
+            
+        }
+
+    }
+
     public class SidePanel : INotifyPropertyChanged
     {
         private bool expanded;
