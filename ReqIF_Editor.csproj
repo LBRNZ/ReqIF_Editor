@@ -110,6 +110,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Settings.cs" />
+    <Compile Include="Tools\SpecObjectsViewModel.cs" />
     <Compile Include="Windows\SelectAttributeDialogWindow.xaml.cs">
       <DependentUpon>SelectAttributeDialogWindow.xaml</DependentUpon>
     </Compile>

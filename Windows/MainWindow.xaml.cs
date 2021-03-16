@@ -62,7 +62,31 @@ namespace ReqIF_Editor
             content.SpecObjects.CollectionChanged += SpecObjects_CollectionChanged;
 
             PropertyGrid.DataContext = header;
+            var test = initializeSpecObjectsViewModel();
             initializeColumns();
+        }
+
+        private SpecObjectsViewModel initializeSpecObjectsViewModel()
+        {
+            SpecObjectsViewModel specObjectsViewModel = new SpecObjectsViewModel();
+            foreach (SpecObject specObject in content.SpecObjects)
+            {
+                SpecobjectViewModel specobjectViewModel = new SpecobjectViewModel()
+                {
+                    Identifier = specObject.Identifier,
+                    AlternativeId = specObject.AlternativeId,
+                    Description = specObject.Description,
+                    LastChange = specObject.LastChange,
+                    LongName = specObject.LongName
+                };
+                foreach(AttributeDefinition attributeDefinition in content.SpecTypes.First().SpecAttributes)
+                {
+                    AttributeValue attributeValue = specObject.Values.Where(x => x.AttributeDefinition == attributeDefinition).FirstOrDefault();
+                    specobjectViewModel.Values.Add(attributeValue);
+                }
+                specObjectsViewModel.SpecObjects.Add(specobjectViewModel);
+            }
+            return specObjectsViewModel;
         }
 
         public void ClearDataGrid()
