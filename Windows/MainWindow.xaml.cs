@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -348,7 +349,10 @@ namespace ReqIF_Editor
             {
                 Binding binding = new Binding("Values")
                 {
-                    Converter = new SpecObjectValueConverter((cell.DataContext as SpecObject).SpecType.SpecAttributes.Where(x => x.LongName == "ReqIF.ChapterName").FirstOrDefault().Identifier)
+                    Converter = new SpecObjectValueConverter((cell.DataContext as SpecObject).SpecType.SpecAttributes.Where(x => x.LongName == "ReqIF.ChapterName").FirstOrDefault().Identifier),
+                    Mode = BindingMode.OneWay,
+                    NotifyOnSourceUpdated = true,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
                 };
                 var factory = new FrameworkElementFactory(typeof(HtmlHeading));
                 factory.SetBinding(HtmlHeading.HtmlProperty, binding);
@@ -361,7 +365,10 @@ namespace ReqIF_Editor
             } else {
                 Binding binding = new Binding("Values")
                 {
-                    Converter = new SpecObjectValueConverter((cell.DataContext as SpecObject).SpecType.SpecAttributes.Where(x => x.LongName == "ReqIF.Text").FirstOrDefault().Identifier)
+                    Converter = new SpecObjectValueConverter((cell.DataContext as SpecObject).SpecType.SpecAttributes.Where(x => x.LongName == "ReqIF.Text").FirstOrDefault().Identifier),
+                    Mode = BindingMode.OneWay,
+                    NotifyOnSourceUpdated = true,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
                 };
                 var factory = new FrameworkElementFactory(typeof(Html));
                 factory.SetBinding(Html.HtmlProperty, binding);
@@ -381,16 +388,11 @@ namespace ReqIF_Editor
     {
         private bool expanded;
 
-        protected void OnPropertyChanged(PropertyChangedEventArgs e)
-        {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-                handler(this, e);
-        }
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void OnPropertyChanged(string propertyName)
+        protected void OnPropertyChanged([CallerMemberName] String propertyName = "")
         {
-            OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public bool Expanded
@@ -401,11 +403,9 @@ namespace ReqIF_Editor
                 if (value != expanded)
                 {
                     expanded = value;
-                    OnPropertyChanged("Expanded");
+                    OnPropertyChanged();
                 }
             }
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 }
