@@ -16,62 +16,6 @@ using System.Xml.Xsl;
 
 namespace ReqIF_Editor
 {
-    public class SpecObjectValueConverter : IValueConverter
-    {
-        private string _Identifier;
-        public SpecObjectValueConverter(string Identifier)
-        {
-            _Identifier = Identifier;
-        }
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            if (value.GetType() == typeof(List<ReqIFSharp.AttributeValue>))
-            {
-                List<ReqIFSharp.AttributeValue> values = (List<ReqIFSharp.AttributeValue>)value;
-                if (values.Where(x => x.AttributeDefinition.Identifier == _Identifier).FirstOrDefault() != null)
-                    if (values.Where(x => x.AttributeDefinition.Identifier == _Identifier).FirstOrDefault().ObjectValue.GetType() == typeof(List<EnumValue>))
-                    {
-                        return ((List<EnumValue>)values.Where(x => x.AttributeDefinition.Identifier == _Identifier).FirstOrDefault().ObjectValue).Select(x => x.LongName);
-                    }
-                    else if (values.Where(x => x.AttributeDefinition.Identifier == _Identifier).FirstOrDefault().AttributeDefinition.GetType() == typeof(AttributeDefinitionXHTML))
-                    {
-                        string removeNamespaces = transformXHTML((string)values.Where(x => x.AttributeDefinition.Identifier == _Identifier).FirstOrDefault().ObjectValue, "ReqIF_Editor.XSLT.NamespaceTrimmer.xslt");
-                        string ObjectToImg = transformXHTML(removeNamespaces, "ReqIF_Editor.XSLT.ObjectToImg.xslt");
-                        return ObjectToImg;
-                    }
-                    else return values.Where(x => x.AttributeDefinition.Identifier == _Identifier).FirstOrDefault().ObjectValue;
-                else return null;
-            }
-            return null;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            throw new NotSupportedException("Cannot convert back");
-        }
-
-        private string transformXHTML(string input, string xsltSource)
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            XslCompiledTransform xslt = new XslCompiledTransform();
-            xslt.Load(XmlReader.Create(assembly.GetManifestResourceStream(xsltSource)));
-            using (MemoryStream msInput = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(input)))
-            {
-                XPathDocument xpathdocument = new XPathDocument(msInput);
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    using (XmlTextWriter writer = new XmlTextWriter(ms, new UTF8Encoding(false)))
-                    {
-                        writer.Formatting = Formatting.Indented;
-
-                        xslt.Transform(xpathdocument, null, writer, null);
-                    }
-                    return Encoding.UTF8.GetString(ms.ToArray());
-                }
-            }
-        }
-    }
-
     public class XHTMLConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

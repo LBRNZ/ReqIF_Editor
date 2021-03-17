@@ -62,7 +62,7 @@ namespace ReqIF_Editor.Commands
 
 		public static void EditSpecObject_Executed(object sender, ExecutedRoutedEventArgs e)
 		{
-			(sender as MainWindow).Edit_SpecObject((sender as MainWindow).MainDataGrid.SelectedItem as SpecObject, false);
+			(sender as MainWindow).Edit_SpecObject((sender as MainWindow).MainDataGrid.SelectedItem as SpecobjectViewModel, false);
 
 		}
 
