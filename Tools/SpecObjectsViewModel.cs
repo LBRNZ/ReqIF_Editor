@@ -2,16 +2,50 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.XPath;
+using System.Xml.Xsl;
 using ReqIFSharp;
 
 namespace ReqIF_Editor
 {
     class SpecObjectsViewModel
     {
+
+        public SpecObjectsViewModel(ReqIFContent content)
+        {
+            foreach (SpecObject specObject in content.SpecObjects)
+            {
+                SpecobjectViewModel specobjectViewModel = new SpecobjectViewModel()
+                {
+                    Identifier = specObject.Identifier,
+                    AlternativeId = specObject.AlternativeId,
+                    Description = specObject.Description,
+                    LastChange = specObject.LastChange,
+                    LongName = specObject.LongName
+                };
+                foreach (AttributeDefinition attributeDefinition in content.SpecTypes.First().SpecAttributes)
+                {
+                    AttributeValue attributeValue = specObject.Values.Where(x => x.AttributeDefinition == attributeDefinition).FirstOrDefault();
+                    if(attributeValue?.GetType() == typeof(AttributeValueXHTML))
+                    {
+                        var assembly = Assembly.GetExecutingAssembly();
+                        string removeNamespaces =((string)attributeValue.ObjectValue).xslTransform(XmlReader.Create(assembly.GetManifestResourceStream("ReqIF_Editor.XSLT.NamespaceTrimmer.xslt")));
+                        string ObjectToImg = removeNamespaces.xslTransform(XmlReader.Create(assembly.GetManifestResourceStream("ReqIF_Editor.XSLT.ObjectToImg.xslt")));
+                        attributeValue.ObjectValue = ObjectToImg;
+                    }
+                    specobjectViewModel.Values.Add(attributeValue);
+                }
+                this.SpecObjects.Add(specobjectViewModel);
+            }
+        }
+
         private readonly ObservableCollection<SpecobjectViewModel> specObjects = new ObservableCollection<SpecobjectViewModel>();
 
         /// <summary>

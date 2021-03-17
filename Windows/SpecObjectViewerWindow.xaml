@@ -48,7 +48,7 @@
                   HorizontalGridLinesBrush="Gray"
                   VerticalGridLinesBrush="Gray">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="{DynamicResource attributes}" Binding="{Binding AttributeDefinition.LongName}" FontSize="14" IsReadOnly="True">
+                <DataGridTextColumn Header="{DynamicResource attributes}" Binding="{Binding Key}" FontSize="14" IsReadOnly="True">
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="DataGridCell">
                             <Setter Property="Background" Value="LightGray"/>
@@ -66,11 +66,11 @@
                 <DataGridTemplateColumn Header="{DynamicResource values}" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ContentPresenter Content="{Binding Path=.}">
+                            <ContentPresenter Content="{Binding Path=Value}">
                                 <ContentPresenter.Resources>
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueXHTML}">
                                         <smith:HtmlEditor HorizontalAlignment="Left" 
-                                                          BindingContent="{Binding ObjectValue, Converter={StaticResource XHTMLConverter}, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                          BindingContent="{Binding ObjectValue, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
                                                           IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"
                                                           FontFamilyListVisibility="Collapsed"
                                                           FontSizeListVisibility="Collapsed" Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ActualWidth}">

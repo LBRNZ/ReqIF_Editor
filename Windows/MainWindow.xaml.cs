@@ -62,31 +62,10 @@ namespace ReqIF_Editor
             content.SpecObjects.CollectionChanged += SpecObjects_CollectionChanged;
 
             PropertyGrid.DataContext = header;
-            var test = initializeSpecObjectsViewModel();
+            var test = new SpecObjectsViewModel(content);
             initializeColumns();
-        }
+            MainDataGrid.ItemsSource = test.SpecObjects;
 
-        private SpecObjectsViewModel initializeSpecObjectsViewModel()
-        {
-            SpecObjectsViewModel specObjectsViewModel = new SpecObjectsViewModel();
-            foreach (SpecObject specObject in content.SpecObjects)
-            {
-                SpecobjectViewModel specobjectViewModel = new SpecobjectViewModel()
-                {
-                    Identifier = specObject.Identifier,
-                    AlternativeId = specObject.AlternativeId,
-                    Description = specObject.Description,
-                    LastChange = specObject.LastChange,
-                    LongName = specObject.LongName
-                };
-                foreach(AttributeDefinition attributeDefinition in content.SpecTypes.First().SpecAttributes)
-                {
-                    AttributeValue attributeValue = specObject.Values.Where(x => x.AttributeDefinition == attributeDefinition).FirstOrDefault();
-                    specobjectViewModel.Values.Add(attributeValue);
-                }
-                specObjectsViewModel.SpecObjects.Add(specobjectViewModel);
-            }
-            return specObjectsViewModel;
         }
 
         public void ClearDataGrid()
@@ -107,7 +86,7 @@ namespace ReqIF_Editor
             {
                 ClearDataGrid();
                 Deserialize(openFileDialog.FileName);
-                MainDataGrid.ItemsSource = content.SpecObjects;
+                //MainDataGrid.ItemsSource = content.SpecObjects;
                 NavigationTreeView.ItemsSource = content.Specifications.First().Children;
 
                 Style rowStyle = new Style(typeof(DataGridRow));
@@ -154,26 +133,26 @@ namespace ReqIF_Editor
 
         private void initializeColumns()
         {
-            bool chapterNameExists = content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault().SpecAttributes.Where(x => x.LongName == "ReqIF.ChapterName").Any();
-            bool textExists = content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault().SpecAttributes.Where(x => x.LongName == "ReqIF.Text").Any();
+            var specObjectType = content.SpecTypes.FirstOrDefault(x => x.GetType() == typeof(SpecObjectType));
+            int chapterIndex = specObjectType?.SpecAttributes.FindIndex(x => x.LongName == "ReqIF.ChapterName") ?? -1;
+            int textIndex = specObjectType?.SpecAttributes.FindIndex(x => x.LongName == "ReqIF.Text") ?? -1;
 
-
-            if (chapterNameExists && textExists)
+            int i = 0;
+            if (chapterIndex >= 0 && textIndex >= 0)
             {
                 DataGridTemplateColumn col = new DataGridTemplateColumn();
                 col.Header = FindResource("requirement");
 
-                col.CellTemplateSelector = new HtmlCellTemplateSelector();
+                col.CellTemplateSelector = new HtmlCellTemplateSelector(chapterIndex, textIndex);
                 col.Width = 500;
                 MainDataGrid.Columns.Add(col);
             }
             foreach (var dataType in content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault().SpecAttributes) {
-                DataGridTemplateColumn col = new DataGridTemplateColumn();
                 FrameworkElementFactory factory = null;
                 DependencyProperty dp = null;
-                col.Header = dataType.LongName;
-                if (chapterNameExists && textExists &&(dataType.LongName == "ReqIF.ChapterName" || dataType.LongName == "ReqIF.Text"))
+                if (chapterIndex == i || textIndex == i)
                 {
+                    i++;
                     continue;
                 }
 
@@ -182,6 +161,14 @@ namespace ReqIF_Editor
                 {
                     factory = new FrameworkElementFactory(typeof(ListView));
                     dp = ListView.ItemsSourceProperty;
+                    //Itemtemplate for EnumValue
+                    FrameworkElementFactory subfactory = new FrameworkElementFactory(typeof(TextBlock));
+                    subfactory.SetBinding(TextBlock.TextProperty, new Binding("LongName"));
+                    DataTemplate dt = new DataTemplate()
+                    {
+                        VisualTree = subfactory
+                    };
+                    factory.SetValue(ListView.ItemTemplateProperty, dt);
                 }
                 else if(typeOfDataType == typeof(DatatypeDefinitionBoolean))
                 {
@@ -208,7 +195,6 @@ namespace ReqIF_Editor
                 {
                     factory = new FrameworkElementFactory(typeof(Html));
                     dp = Html.HtmlProperty;
-                    col.Width = 500;
                 }
                 else if (typeOfDataType == typeof(DatatypeDefinitionDate))
                 {
@@ -216,33 +202,34 @@ namespace ReqIF_Editor
                     dp = TextBlock.TextProperty;
                 }
                 factory.SetValue(IsEnabledProperty, false);
-                factory.SetBinding(dp, new Binding("Values")
+                factory.SetBinding(dp, new Binding("Values[" + i++ + "].ObjectValue")
                 {
                     Mode = BindingMode.OneWay,
-                    Converter = new SpecObjectValueConverter(dataType.Identifier),
                     NotifyOnSourceUpdated = true,
                     UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
                 });
-                DataTemplate cellTemplate = new DataTemplate();
-                cellTemplate.VisualTree = factory;
-                col.CellTemplate = cellTemplate;
-                MainDataGrid.Columns.Add(col);
+                DataGridTemplateColumn dataGridTemplateColumn = new DataGridTemplateColumn()
+                {
+                    Header = dataType.LongName,
+                    CellTemplate = new DataTemplate() { VisualTree = factory }
+                };
+                MainDataGrid.Columns.Add(dataGridTemplateColumn);
             }
         }
 
         public void Add_SpecObject(string position)
         {
-            SpecObject specObject = new SpecObject()
-            {
-                Identifier = Guid.NewGuid().ToString(),
-                LastChange = DateTime.Now,
-                ReqIfContent = content,
-                SpecType = content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault()
-            };
-            Edit_SpecObject(specObject, true, position);
+            //SpecobjectViewModel specObject = new SpecobjectViewModel()
+            //{
+            //    Identifier = Guid.NewGuid().ToString(),
+            //    LastChange = DateTime.Now,
+            //    ReqIfContent = content,
+            //    SpecType = content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault()
+            //};
+            //Edit_SpecObject(specObject, true, position);
         }
 
-        public void Edit_SpecObject(SpecObject specObject, bool newSpecObject, string position = null)
+        public void Edit_SpecObject(SpecobjectViewModel specObject, bool newSpecObject, string position = null)
         {
             SpecObjectViewerWindow SpecObjectViewer = new SpecObjectViewerWindow(specObject, newSpecObject, position);
             SpecObjectViewer.Owner = Window.GetWindow(this);
@@ -251,7 +238,7 @@ namespace ReqIF_Editor
 
         private void Row_DoubleClick(object sender, MouseButtonEventArgs e)
         {
-            Edit_SpecObject((sender as DataGridRow).DataContext as SpecObject, false);
+            Edit_SpecObject((sender as DataGridRow).DataContext as SpecobjectViewModel, false, "");
 
         }
 
@@ -363,17 +350,24 @@ namespace ReqIF_Editor
 
     public class HtmlCellTemplateSelector : DataTemplateSelector
     {
+        private int _chapterIndex;
+        private int _textIndex;
+        public HtmlCellTemplateSelector(int chapterIndex, int textIndex)
+        {
+            _chapterIndex = chapterIndex;
+            _textIndex = textIndex;
+        }
 
         public override DataTemplate SelectTemplate(object item, System.Windows.DependencyObject container)
         {
             ContentPresenter presenter = container as ContentPresenter;
             DataGridCell cell = presenter.Parent as DataGridCell;
 
-            if ((cell.DataContext as SpecObject).Values.Where(x => x.AttributeDefinition.LongName == "ReqIF.ChapterName").Any())
+            if ((cell.DataContext as SpecobjectViewModel).Values.SingleOrDefault(x => x?.AttributeDefinition.LongName == "ReqIF.ChapterName") != null)
             {
-                Binding binding = new Binding("Values")
+                Binding binding = new Binding("Values[" + _chapterIndex + "].TheValue")
                 {
-                    Converter = new SpecObjectValueConverter((cell.DataContext as SpecObject).SpecType.SpecAttributes.Where(x => x.LongName == "ReqIF.ChapterName").FirstOrDefault().Identifier),
+                    //Converter = new SpecObjectValueConverter((cell.DataContext as SpecObject).SpecType.SpecAttributes.Where(x => x.LongName == "ReqIF.ChapterName").FirstOrDefault().Identifier),
                     Mode = BindingMode.OneWay,
                     NotifyOnSourceUpdated = true,
                     UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
@@ -387,9 +381,9 @@ namespace ReqIF_Editor
                 };
                 return cellTemplate;
             } else {
-                Binding binding = new Binding("Values")
+                Binding binding = new Binding("Values[" + _textIndex + "].TheValue")
                 {
-                    Converter = new SpecObjectValueConverter((cell.DataContext as SpecObject).SpecType.SpecAttributes.Where(x => x.LongName == "ReqIF.Text").FirstOrDefault().Identifier),
+                    //Converter = new SpecObjectValueConverter((cell.DataContext as SpecObject).SpecType.SpecAttributes.Where(x => x.LongName == "ReqIF.Text").FirstOrDefault().Identifier),
                     Mode = BindingMode.OneWay,
                     NotifyOnSourceUpdated = true,
                     UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged

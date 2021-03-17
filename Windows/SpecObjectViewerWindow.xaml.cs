@@ -16,12 +16,19 @@ namespace ReqIF_Editor
     public partial class SpecObjectViewerWindow : Window
     {
         private bool _newSpecObject;
-        private SpecObject _specObject;
+        private SpecobjectViewModel _specObject;
         private string _position;
-        public SpecObjectViewerWindow(SpecObject specObject, bool newSpecObject, string position)
+        public SpecObjectViewerWindow(SpecobjectViewModel specObject, bool newSpecObject, string position = null)
         {
             InitializeComponent();
-            DataTable.ItemsSource = specObject.Values;
+            var test = new Dictionary<String, AttributeValue>();
+            int i = 0;
+            foreach(var value in specObject.Values)
+            {
+                var key = (Application.Current.MainWindow as MainWindow).content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault().SpecAttributes[i++].LongName;
+                test.Add(key, value);
+            }
+            DataTable.ItemsSource = test;
             InfoExpander.DataContext = specObject;
             _newSpecObject = newSpecObject;
             _specObject = specObject;
@@ -33,38 +40,38 @@ namespace ReqIF_Editor
         {
             if (_newSpecObject)
             {
-                int currentIndex = 0;
-                SpecObject currentObject = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedItem as SpecObject;
-                var specifications = (Application.Current.MainWindow as MainWindow).content.Specifications;
+                //    int currentIndex = 0;
+                //    SpecObject currentObject = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedItem as SpecObject;
+                //    var specifications = (Application.Current.MainWindow as MainWindow).content.Specifications;
 
-                //Add SpecObject to SpecHierarchy and to SpecObjects
-                SpecHierarchy specHierarchy = specifications.First().Children.First().Descendants()
-                    .Where(node => node.Object == currentObject).First();
-                if (_position == "after")
-                {
-                    SpecHierarchy parentSpecHierarchy = specHierarchy.Container;
-                    int specHierarchyIndex = parentSpecHierarchy.Children.IndexOf(specHierarchy);
-                    parentSpecHierarchy.Children.Insert(specHierarchyIndex + 1, new SpecHierarchy()
-                    {
-                        Object = _specObject,
-                        Identifier = Guid.NewGuid().ToString(),
-                        LastChange = DateTime.Now
-                    });
-                    var previousObject = specHierarchy.Descendants().Last().Object;
-                    currentIndex = (Application.Current.MainWindow as MainWindow).content.SpecObjects.IndexOf(previousObject);
-                }
-                else if (_position == "under")
-                {
-                    specHierarchy.Children.Insert(0, new SpecHierarchy()
-                    {
-                        Object = _specObject,
-                        Identifier = Guid.NewGuid().ToString(),
-                        LastChange = DateTime.Now
-                    });
-                    currentIndex = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedIndex;
-                    
-                }
-                (Application.Current.MainWindow as MainWindow).content.SpecObjects.Insert(currentIndex + 1, _specObject);
+                //    //Add SpecObject to SpecHierarchy and to SpecObjects
+                //    SpecHierarchy specHierarchy = specifications.First().Children.First().Descendants()
+                //        .Where(node => node.Object == currentObject).First();
+                //    if (_position == "after")
+                //    {
+                //        SpecHierarchy parentSpecHierarchy = specHierarchy.Container;
+                //        int specHierarchyIndex = parentSpecHierarchy.Children.IndexOf(specHierarchy);
+                //        parentSpecHierarchy.Children.Insert(specHierarchyIndex + 1, new SpecHierarchy()
+                //        {
+                //            Object = _specObject,
+                //            Identifier = Guid.NewGuid().ToString(),
+                //            LastChange = DateTime.Now
+                //        });
+                //        var previousObject = specHierarchy.Descendants().Last().Object;
+                //        currentIndex = (Application.Current.MainWindow as MainWindow).content.SpecObjects.IndexOf(previousObject);
+                //    }
+                //    else if (_position == "under")
+                //    {
+                //        specHierarchy.Children.Insert(0, new SpecHierarchy()
+                //        {
+                //            Object = _specObject,
+                //            Identifier = Guid.NewGuid().ToString(),
+                //            LastChange = DateTime.Now
+                //        });
+                //        currentIndex = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedIndex;
+
+                //    }
+                //    (Application.Current.MainWindow as MainWindow).content.SpecObjects.Insert(currentIndex + 1, _specObject);
             }
 
             for (int i = 0; i < DataTable.Items.Count; i++)
@@ -74,7 +81,7 @@ namespace ReqIF_Editor
                 (binding.DataItem as AttributeValue).PropertyChanged += SpecObjectViewerWindow_PropertyChanged;
                 binding.UpdateSource();
             }
-            
+
             Close();
         }
 
@@ -140,22 +147,5 @@ namespace ReqIF_Editor
             }
         }
 
-    }
-    public static class MyExtensions
-    {
-        public static IEnumerable<SpecHierarchy> Descendants(this SpecHierarchy root)
-        {
-            var nodes = new Stack<SpecHierarchy>(new[] { root });
-            while (nodes.Any())
-            {
-                SpecHierarchy node = nodes.Pop();
-                yield return node;
-                for (int i = node.Children.Count - 1; i >= 0; i--)
-                {
-                    nodes.Push(node.Children[i]);
-                }
-
-            }
-        }
     }
 }
