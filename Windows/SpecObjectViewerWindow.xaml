@@ -48,7 +48,7 @@
                   HorizontalGridLinesBrush="Gray"
                   VerticalGridLinesBrush="Gray">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="{DynamicResource attributes}" Binding="{Binding Key}" FontSize="14" IsReadOnly="True">
+                <DataGridTextColumn Header="{DynamicResource attributes}" Binding="{Binding Key.LongName}" FontSize="14" IsReadOnly="True">
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="DataGridCell">
                             <Setter Property="Background" Value="LightGray"/>
@@ -119,6 +119,7 @@
                                                  BorderBrush="{x:Null}"
                                                  IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"/>
                                     </DataTemplate>
+
                                 </ContentPresenter.Resources>
                             </ContentPresenter>
                         </DataTemplate>
@@ -126,6 +127,18 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
             <DataGrid.Resources>
+                <DataTemplate x:Key="emptyCell">
+                    <Button x:Name="AddSpecObject_Button"
+                    Height="20"
+                    Width="20"
+                    Margin="5"
+                    Click="AddSpecObjectButton_Click"
+                    DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{StaticResource PlusIcon}" Margin="0,0,5,0" ToolTip="{DynamicResource addAttribute}"/>
+                        </StackPanel>
+                    </Button>
+                </DataTemplate>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"/>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"/>
@@ -134,22 +147,14 @@
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="BorderBrush" Value="Transparent"/>
                         </Trigger>
+                        <DataTrigger Binding="{Binding Value}" Value="{x:Null}">
+                            <Setter Property="ContentTemplate" Value="{StaticResource emptyCell}"/>
+                        </DataTrigger>
                     </Style.Triggers>
-                </Style> 
+                </Style>
             </DataGrid.Resources>
         </DataGrid>
         <DockPanel Grid.Row="2" LastChildFill="False">
-            <Button x:Name="AddSpecObject_Button"
-                    Height="30"
-                    Margin="5"
-                    Padding="5"
-                    Click="AddSpecObjectButton_Click"
-                    DockPanel.Dock="Left">
-                <StackPanel Orientation="Horizontal">
-                    <Image Source="{StaticResource PlusIcon}" Margin="0,0,5,0"/>
-                    <TextBlock Text="{DynamicResource addAttribute}"/>
-                </StackPanel>
-            </Button>
             <Button x:Name="SaveSpecObject_Button"
                     Content="{DynamicResource save}"
                     Height="30"
