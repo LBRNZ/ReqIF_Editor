@@ -15,7 +15,7 @@ using ReqIFSharp;
 
 namespace ReqIF_Editor
 {
-    class SpecObjectsViewModel
+    public class SpecObjectsViewModel
     {
 
         public SpecObjectsViewModel(ReqIFContent content)

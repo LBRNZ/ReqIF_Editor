@@ -1,5 +1,4 @@
-﻿using ReqIF_Editor.Windows;
-using ReqIFSharp;
+﻿using ReqIFSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,6 +7,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using Microsoft.CSharp;
+using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 
 namespace ReqIF_Editor
 {
@@ -19,16 +20,26 @@ namespace ReqIF_Editor
         private bool _newSpecObject;
         private SpecobjectViewModel _specObject;
         private string _position;
-        private Dictionary<AttributeDefinition, AttributeValue> _attributes;
+        private ObservableCollection<SpecObjectValueModel> _attributes;
         public SpecObjectViewerWindow(SpecobjectViewModel specObject, bool newSpecObject, string position = null)
         {
             InitializeComponent();
-            _attributes = new Dictionary<AttributeDefinition, AttributeValue>();
+            _attributes = new ObservableCollection<SpecObjectValueModel>();
             int i = 0;
             foreach(var value in specObject.Values)
             {
-                var key = (Application.Current.MainWindow as MainWindow).content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault().SpecAttributes[i++];
-                _attributes.Add(key, value);
+                var definition = (Application.Current.MainWindow as MainWindow).content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault().SpecAttributes[i++];
+                _attributes.Add(new SpecObjectValueModel()
+                {
+                    AttributeDefinition = definition,
+                    AttributeValue = value,
+                    hasChanged = false
+                });
+            }
+            //Register property changed event for every value
+            foreach (var attribute in _attributes)
+            {
+                attribute.PropertyChanged += AttributeValue_PropertyChanged;
             }
             DataTable.ItemsSource = _attributes;
             InfoExpander.DataContext = specObject;
@@ -42,49 +53,72 @@ namespace ReqIF_Editor
         {
             if (_newSpecObject)
             {
-                //    int currentIndex = 0;
-                //    SpecObject currentObject = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedItem as SpecObject;
-                //    var specifications = (Application.Current.MainWindow as MainWindow).content.Specifications;
+                int currentIndex = 0;
+                SpecObject currentObject = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedItem as SpecObject;
+                var specifications = (Application.Current.MainWindow as MainWindow).content.Specifications;
 
-                //    //Add SpecObject to SpecHierarchy and to SpecObjects
-                //    SpecHierarchy specHierarchy = specifications.First().Children.First().Descendants()
-                //        .Where(node => node.Object == currentObject).First();
-                //    if (_position == "after")
-                //    {
-                //        SpecHierarchy parentSpecHierarchy = specHierarchy.Container;
-                //        int specHierarchyIndex = parentSpecHierarchy.Children.IndexOf(specHierarchy);
-                //        parentSpecHierarchy.Children.Insert(specHierarchyIndex + 1, new SpecHierarchy()
-                //        {
-                //            Object = _specObject,
-                //            Identifier = Guid.NewGuid().ToString(),
-                //            LastChange = DateTime.Now
-                //        });
-                //        var previousObject = specHierarchy.Descendants().Last().Object;
-                //        currentIndex = (Application.Current.MainWindow as MainWindow).content.SpecObjects.IndexOf(previousObject);
-                //    }
-                //    else if (_position == "under")
-                //    {
-                //        specHierarchy.Children.Insert(0, new SpecHierarchy()
-                //        {
-                //            Object = _specObject,
-                //            Identifier = Guid.NewGuid().ToString(),
-                //            LastChange = DateTime.Now
-                //        });
-                //        currentIndex = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedIndex;
+                //Create new SpecObject and add Attributes
+                SpecObject newSpecObject = new SpecObject()
+                {
+                    Description = _specObject.Description,
+                    Identifier = _specObject.Identifier,
+                    LastChange = _specObject.LastChange
 
-                //    }
-                //    (Application.Current.MainWindow as MainWindow).content.SpecObjects.Insert(currentIndex + 1, _specObject);
+                };
+                foreach (var attribute in _attributes)
+                {
+                    newSpecObject.Values.Add(attribute.AttributeValue);
+                }
+
+                    //Add SpecObject to SpecHierarchy and to SpecObjects
+                //SpecHierarchy specHierarchy = specifications.First().Children.First().Descendants()
+                //.Where(node => node.Object == currentObject).First();
+                //if (_position == "after")
+                //{
+                //    SpecHierarchy parentSpecHierarchy = specHierarchy.Container;
+                //    int specHierarchyIndex = parentSpecHierarchy.Children.IndexOf(specHierarchy);
+                //    parentSpecHierarchy.Children.Insert(specHierarchyIndex + 1, new SpecHierarchy()
+                //    {
+                //        Object = _specObject,
+                //        Identifier = Guid.NewGuid().ToString(),
+                //        LastChange = DateTime.Now
+                //    });
+                //    var previousObject = specHierarchy.Descendants().Last().Object;
+                //    currentIndex = (Application.Current.MainWindow as MainWindow).content.SpecObjects.IndexOf(previousObject);
+                //}
+                //else if (_position == "under")
+                //{
+                //    specHierarchy.Children.Insert(0, new SpecHierarchy()
+                //    {
+                //        Object = _specObject,
+                //        Identifier = Guid.NewGuid().ToString(),
+                //        LastChange = DateTime.Now
+                //    });
+                //    currentIndex = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedIndex;
+
+                //}
+                    (Application.Current.MainWindow as MainWindow).contenModel.SpecObjects.Insert(currentIndex + 1, _specObject);
             }
-
-            for (int i = 0; i < DataTable.Items.Count; i++)
+            int i = 0;
+            foreach(var attribute in _attributes)
             {
-                DataGridRow row = DataTable.ItemContainerGenerator.ContainerFromIndex(i) as DataGridRow;
-                BindingExpression binding = row.BindingGroup.BindingExpressions.First() as BindingExpression;
-                (binding.DataItem as AttributeValue).PropertyChanged += SpecObjectViewerWindow_PropertyChanged;
-                binding.UpdateSource();
+                if (attribute.AttributeValue != null)
+                {
+                    _specObject.Values[i] = attribute.AttributeValue;
+                    _specObject.LastChange = DateTime.Now;
+                }
+                i++;
             }
 
             Close();
+        }
+
+        private void AttributeValue_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if(sender.GetType() == typeof(SpecObjectValueModel))
+            {
+                (sender as SpecObjectValueModel).hasChanged = true;
+            }
         }
 
         private void SpecObjectViewerWindow_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -99,7 +133,7 @@ namespace ReqIF_Editor
 
         private void AddSpecObjectButton_Click(object sender, RoutedEventArgs e)
         {
-            AttributeDefinition selectedAttribute = ((sender as Button).DataContext as dynamic).Key as AttributeDefinition;
+            AttributeDefinition selectedAttribute = ((sender as Button).DataContext as SpecObjectValueModel).AttributeDefinition;
             AttributeValue attributeValue = null;
             if (selectedAttribute.GetType() == typeof(AttributeDefinitionBoolean))
             {
@@ -138,9 +172,42 @@ namespace ReqIF_Editor
                 attributeValue.ObjectValue = "<div></div>";
             }
             attributeValue.AttributeDefinition = selectedAttribute;
-            _attributes[selectedAttribute] = attributeValue;
+            _attributes.Single(x => x.AttributeDefinition == selectedAttribute).AttributeValue = attributeValue;
             DataTable.Items.Refresh();
         }
 
+    }
+
+    class SpecObjectValueModel : INotifyPropertyChanged
+    {
+        private AttributeDefinition _attributeDefinition;
+        private AttributeValue _attributeValue;
+        private bool _hasChanged;
+
+        public AttributeDefinition AttributeDefinition
+        {
+            get { return _attributeDefinition; }
+            set { _attributeDefinition = value;}
+        }
+        public AttributeValue AttributeValue
+        {
+            get { return _attributeValue; }
+            set { _attributeValue = value; NotifyPropertyChanged(); }
+        }
+        public bool hasChanged
+        {
+            get { return _hasChanged; }
+            set { _hasChanged = value;}
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
     }
 }

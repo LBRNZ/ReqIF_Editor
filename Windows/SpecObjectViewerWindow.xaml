@@ -48,7 +48,7 @@
                   HorizontalGridLinesBrush="Gray"
                   VerticalGridLinesBrush="Gray">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="{DynamicResource attributes}" Binding="{Binding Key.LongName}" FontSize="14" IsReadOnly="True">
+                <DataGridTextColumn Header="{DynamicResource attributes}" Binding="{Binding Path=AttributeDefinition.LongName}" FontSize="14" IsReadOnly="True">
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="DataGridCell">
                             <Setter Property="Background" Value="LightGray"/>
@@ -66,11 +66,11 @@
                 <DataGridTemplateColumn Header="{DynamicResource values}" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ContentPresenter Content="{Binding Path=Value}">
+                            <ContentPresenter Content="{Binding Path=AttributeValue}">
                                 <ContentPresenter.Resources>
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueXHTML}">
                                         <smith:HtmlEditor HorizontalAlignment="Left" 
-                                                          BindingContent="{Binding ObjectValue, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                          BindingContent="{Binding ObjectValue, Mode=TwoWay}"
                                                           IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"
                                                           FontFamilyListVisibility="Collapsed"
                                                           FontSizeListVisibility="Collapsed" Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ActualWidth}">
@@ -79,7 +79,7 @@
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueEnumeration}">
                                         <ListBox HorizontalAlignment="Left"
                                                  ItemsSource="{Binding Definition.DatatypeDefinition.SpecifiedValues}"
-                                                 SelectedItem="{Binding ObjectValue[0], Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                 SelectedItem="{Binding ObjectValue[0], Mode=TwoWay}"
                                                  IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}">
                                             <ListBox.ItemTemplate>
                                                 <DataTemplate>
@@ -90,17 +90,17 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueBoolean}">
                                         <CheckBox HorizontalAlignment="Left"
-                                                  IsChecked="{Binding ObjectValue, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                  IsChecked="{Binding ObjectValue, Mode=TwoWay}"
                                                   IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueDate}">
                                         <wpftool:DateTimePicker HorizontalAlignment="Left"
-                                                                Value="{Binding ObjectValue, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                                Value="{Binding ObjectValue, Mode=TwoWay}"
                                                                 IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueInteger}">
                                         <wpftool:LongUpDown HorizontalAlignment="Stretch"
-                                                            Value="{Binding ObjectValue, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                            Value="{Binding ObjectValue, Mode=TwoWay}"
                                                             Maximum="{Binding Definition.DatatypeDefinition.Max}"
                                                             Minimum="{Binding Definition.DatatypeDefinition.Min}"
                                                             HorizontalContentAlignment="Left"
@@ -108,14 +108,14 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueReal}">
                                         <wpftool:DoubleUpDown HorizontalAlignment="Left"
-                                                            Value="{Binding ObjectValue, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                            Value="{Binding ObjectValue, Mode=TwoWay}"
                                                             Maximum="{Binding Definition.DatatypeDefinition.Max}"
                                                             Minimum="{Binding Definition.DatatypeDefinition.Min}"
                                                             IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueString}">
                                         <TextBox HorizontalAlignment="Stretch"
-                                                 Text="{Binding ObjectValue, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                 Text="{Binding ObjectValue, Mode=TwoWay}"
                                                  BorderBrush="{x:Null}"
                                                  IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"/>
                                     </DataTemplate>
@@ -147,7 +147,7 @@
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="BorderBrush" Value="Transparent"/>
                         </Trigger>
-                        <DataTrigger Binding="{Binding Value}" Value="{x:Null}">
+                        <DataTrigger Binding="{Binding  AttributeValue}" Value="{x:Null}">
                             <Setter Property="ContentTemplate" Value="{StaticResource emptyCell}"/>
                         </DataTrigger>
                     </Style.Triggers>
