@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using Microsoft.CSharp;
 
 namespace ReqIF_Editor
 {
@@ -18,17 +19,18 @@ namespace ReqIF_Editor
         private bool _newSpecObject;
         private SpecobjectViewModel _specObject;
         private string _position;
+        private Dictionary<AttributeDefinition, AttributeValue> _attributes;
         public SpecObjectViewerWindow(SpecobjectViewModel specObject, bool newSpecObject, string position = null)
         {
             InitializeComponent();
-            var test = new Dictionary<String, AttributeValue>();
+            _attributes = new Dictionary<AttributeDefinition, AttributeValue>();
             int i = 0;
             foreach(var value in specObject.Values)
             {
-                var key = (Application.Current.MainWindow as MainWindow).content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault().SpecAttributes[i++].LongName;
-                test.Add(key, value);
+                var key = (Application.Current.MainWindow as MainWindow).content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault().SpecAttributes[i++];
+                _attributes.Add(key, value);
             }
-            DataTable.ItemsSource = test;
+            DataTable.ItemsSource = _attributes;
             InfoExpander.DataContext = specObject;
             _newSpecObject = newSpecObject;
             _specObject = specObject;
@@ -97,54 +99,47 @@ namespace ReqIF_Editor
 
         private void AddSpecObjectButton_Click(object sender, RoutedEventArgs e)
         {
-            string title = (string)FindResource("selectAttribute");
-            List<AttributeDefinition> atrDef = (Application.Current.MainWindow as MainWindow).content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault().SpecAttributes;
-            SelectAttributeDialogWindow cdw = new SelectAttributeDialogWindow(atrDef, title);
-            cdw.Owner = this;
-            if ((bool)cdw.ShowDialog())
+            AttributeDefinition selectedAttribute = ((sender as Button).DataContext as dynamic).Key as AttributeDefinition;
+            AttributeValue attributeValue = null;
+            if (selectedAttribute.GetType() == typeof(AttributeDefinitionBoolean))
             {
-                AttributeValue attributeValue = null;
-                AttributeDefinition selectedAttribute = cdw.selectedAttribute;
-                if (selectedAttribute.GetType() == typeof(AttributeDefinitionBoolean))
-                {
-                    attributeValue = new AttributeValueBoolean();
-                    attributeValue.ObjectValue = false;
-                } else if (selectedAttribute.GetType() == typeof(AttributeDefinitionDate))
-                {
-                    attributeValue = new AttributeValueDate();
-                    attributeValue.ObjectValue = DateTime.Now;
-                }
-                else if (selectedAttribute.GetType() == typeof(AttributeDefinitionEnumeration))
-                {
-                    attributeValue = new AttributeValueEnumeration();
-                    List<EnumValue> enumValues = new List<EnumValue>();
-                    enumValues.Add(((DatatypeDefinitionEnumeration)selectedAttribute.DatatypeDefinition).SpecifiedValues.First());
-                    attributeValue.ObjectValue = enumValues;
-                }
-                else if (selectedAttribute.GetType() == typeof(AttributeDefinitionInteger))
-                {
-                    attributeValue = new AttributeValueInteger();
-                    attributeValue.ObjectValue = "";
-                }
-                else if (selectedAttribute.GetType() == typeof(AttributeDefinitionReal))
-                {
-                    attributeValue = new AttributeValueReal();
-                    attributeValue.ObjectValue = "";
-                }
-                else if (selectedAttribute.GetType() == typeof(AttributeDefinitionString))
-                {
-                    attributeValue = new AttributeValueString();
-                    attributeValue.ObjectValue = "";
-                }
-                else if (selectedAttribute.GetType() == typeof(AttributeDefinitionXHTML))
-                {
-                    attributeValue = new AttributeValueXHTML();
-                    attributeValue.ObjectValue = "<div></div>";
-                }
-                attributeValue.AttributeDefinition = selectedAttribute;
-                _specObject.Values.Add(attributeValue);
-                DataTable.Items.Refresh();
+                attributeValue = new AttributeValueBoolean();
+                attributeValue.ObjectValue = false;
+            } else if (selectedAttribute.GetType() == typeof(AttributeDefinitionDate))
+            {
+                attributeValue = new AttributeValueDate();
+                attributeValue.ObjectValue = DateTime.Now;
             }
+            else if (selectedAttribute.GetType() == typeof(AttributeDefinitionEnumeration))
+            {
+                attributeValue = new AttributeValueEnumeration();
+                List<EnumValue> enumValues = new List<EnumValue>();
+                enumValues.Add(((DatatypeDefinitionEnumeration)selectedAttribute.DatatypeDefinition).SpecifiedValues.First());
+                attributeValue.ObjectValue = enumValues;
+            }
+            else if (selectedAttribute.GetType() == typeof(AttributeDefinitionInteger))
+            {
+                attributeValue = new AttributeValueInteger();
+                attributeValue.ObjectValue = "";
+            }
+            else if (selectedAttribute.GetType() == typeof(AttributeDefinitionReal))
+            {
+                attributeValue = new AttributeValueReal();
+                attributeValue.ObjectValue = "";
+            }
+            else if (selectedAttribute.GetType() == typeof(AttributeDefinitionString))
+            {
+                attributeValue = new AttributeValueString();
+                attributeValue.ObjectValue = "";
+            }
+            else if (selectedAttribute.GetType() == typeof(AttributeDefinitionXHTML))
+            {
+                attributeValue = new AttributeValueXHTML();
+                attributeValue.ObjectValue = "<div></div>";
+            }
+            attributeValue.AttributeDefinition = selectedAttribute;
+            _attributes[selectedAttribute] = attributeValue;
+            DataTable.Items.Refresh();
         }
 
     }
