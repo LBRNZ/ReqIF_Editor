@@ -27,6 +27,7 @@ namespace ReqIF_Editor
         public ReqIF reqif;
         public ReqIFHeader header;
         public ReqIFContent content;
+        public SpecObjectsViewModel contenModel;
         public List<EmbeddedObject> embeddedObjects;
         public SidePanel Sidepanel = new SidePanel();
         public bool isContenChanged = false;
@@ -62,9 +63,9 @@ namespace ReqIF_Editor
             content.SpecObjects.CollectionChanged += SpecObjects_CollectionChanged;
 
             PropertyGrid.DataContext = header;
-            var test = new SpecObjectsViewModel(content);
+            contenModel = new SpecObjectsViewModel(content);
             initializeColumns();
-            MainDataGrid.ItemsSource = test.SpecObjects;
+            MainDataGrid.ItemsSource = contenModel.SpecObjects;
 
         }
 
@@ -219,14 +220,18 @@ namespace ReqIF_Editor
 
         public void Add_SpecObject(string position)
         {
-            //SpecobjectViewModel specObject = new SpecobjectViewModel()
-            //{
-            //    Identifier = Guid.NewGuid().ToString(),
-            //    LastChange = DateTime.Now,
-            //    ReqIfContent = content,
-            //    SpecType = content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault()
-            //};
-            //Edit_SpecObject(specObject, true, position);
+            SpecobjectViewModel specObject = new SpecobjectViewModel()
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                LastChange = DateTime.Now,
+                //ReqIfContent = content,
+                //SpecType = content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault()
+            };
+            foreach (AttributeDefinition attributeDefinition in content.SpecTypes.First().SpecAttributes)
+            {
+                specObject.Values.Add(null);
+            }
+            Edit_SpecObject(specObject, true, position);
         }
 
         public void Edit_SpecObject(SpecobjectViewModel specObject, bool newSpecObject, string position = null)
