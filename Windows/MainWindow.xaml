@@ -20,6 +20,12 @@
         <Style x:Key="PropertyNameStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14" />
         </Style>
+        <DataTemplate x:Key="TextTemplate">
+            <TextBox HorizontalAlignment="Stretch"
+                Text="TEST XXX"
+                BorderBrush="{x:Null}"
+                Name="dataField"/>
+        </DataTemplate>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>

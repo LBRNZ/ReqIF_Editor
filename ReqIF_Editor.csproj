@@ -66,8 +66,8 @@
     <Reference Include="Fluent, Version=8.0.0.0, Culture=neutral, PublicKeyToken=3e436e32a8c5546f, processorArchitecture=MSIL">
       <HintPath>packages\Fluent.Ribbon.8.0.3\lib\net462\Fluent.dll</HintPath>
     </Reference>
-    <Reference Include="HtmlEditorWPF, Version=1.2.1.0, Culture=neutral, processorArchitecture=x86">
-      <HintPath>packages\HtmlEditorWPF.1.2.1\lib\net472\HtmlEditorWPF.dll</HintPath>
+    <Reference Include="HtmlEditorWPF, Version=1.2.2.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>packages\HtmlEditorWPF.1.2.2\lib\net472\HtmlEditorWPF.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Xaml.Behaviors.Wpf.1.1.31\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
@@ -212,12 +212,7 @@
     <None Include="Resources\Document-notFound.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="smithhtmleditor.config.xml" />
-    <EmbeddedResource Include="Resources\heading.css" />
-    <EmbeddedResource Include="Resources\text.css" />
-    <Content Include="smithhtmleditor.stylesheet.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <EmbeddedResource Include="Resources\htmlViewer.css" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="MSHTML">
@@ -229,6 +224,11 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="XSLT\AddClassToDiv.xslt" />
+    <Resource Include="smithhtmleditor.config.xml" />
+    <Content Include="smithhtmleditor.stylesheet.css" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

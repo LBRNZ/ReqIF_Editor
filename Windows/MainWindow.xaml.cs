@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using ReqIFSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
@@ -10,12 +11,16 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Navigation;
+using System.Windows.Markup;
+using System.Xml;
+using System.Windows.Media;
 
 namespace ReqIF_Editor
 {
@@ -27,7 +32,7 @@ namespace ReqIF_Editor
         public ReqIF reqif;
         public ReqIFHeader header;
         public ReqIFContent content;
-        public SpecObjectsViewModel contenModel;
+        public SpecObjectsViewModel specObjectsViewModel;
         public List<EmbeddedObject> embeddedObjects;
         public SidePanel Sidepanel = new SidePanel();
         public bool isContenChanged = false;
@@ -44,15 +49,7 @@ namespace ReqIF_Editor
             NavigationButton.DataContext = Sidepanel;
         }
 
-        private void SpecObjects_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            isContenChanged = true;
-        }
 
-        void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            Commands.MainWindowCommands.BindCommandsToWindow(this);
-        }
         public void Deserialize(string filepath)
         {
             ReqIFDeserializer deserializer = new ReqIFDeserializer();
@@ -60,14 +57,28 @@ namespace ReqIF_Editor
             header = reqif.TheHeader.FirstOrDefault(); ;
             content = reqif.CoreContent.FirstOrDefault();
             embeddedObjects = reqif.EmbeddedObjects;
-            content.SpecObjects.CollectionChanged += SpecObjects_CollectionChanged;
 
             PropertyGrid.DataContext = header;
-            contenModel = new SpecObjectsViewModel(content);
+            specObjectsViewModel = new SpecObjectsViewModel(content);
+            specObjectsViewModel.SpecObjects.CollectionChanged += SpecObjects_CollectionChanged;
+            foreach (var specObject in specObjectsViewModel.SpecObjects)
+            {
+                foreach (var attribute in specObject.Values)
+                {
+                    attribute.PropertyChanged += Attribute_PropertyChanged;
+                }
+                foreach (var attribute in specObject.Values)
+                {
+                    if(attribute.AttributeValue != null)
+                        attribute.AttributeValue.PropertyChanged += AttributeValue_PropertyChanged;
+                }
+            }
             initializeColumns();
-            MainDataGrid.ItemsSource = contenModel.SpecObjects;
+            MainDataGrid.ItemsSource = specObjectsViewModel.SpecObjects;
 
         }
+
+
 
         public void ClearDataGrid()
         {
@@ -78,6 +89,100 @@ namespace ReqIF_Editor
             MainDataGrid.Columns.Clear();
             MainDataGrid.Items.Refresh();
         }
+
+        #region Actions
+        public void Add_SpecObject(string position)
+        {
+            SpecobjectViewModel specObject = new SpecobjectViewModel()
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                LastChange = DateTime.Now,
+            };
+            foreach (AttributeDefinition attributeDefinition in content.SpecTypes.First().SpecAttributes)
+            {
+                specObject.Values.Add(null);
+            }
+            Edit_SpecObject(specObject, true, position);
+        }
+
+        public void Edit_SpecObject(SpecobjectViewModel specObject, bool newSpecObject, string position = null)
+        {
+            SpecObjectViewerWindow SpecObjectViewer = new SpecObjectViewerWindow(specObject, newSpecObject, position);
+            SpecObjectViewer.Owner = Window.GetWindow(this);
+            SpecObjectViewer.Show();
+        }
+
+        private void ScrollToRow(SpecObject specObject)
+        {
+            MainDataGrid.SelectedItem = specObject;
+            MainDataGrid.ScrollIntoView(specObject);
+        }
+
+        private void SearchDocument()
+        {
+            string searchPhrase = SearchInputBox.Text;
+            if (searchPhrase != "")
+            {
+                List<List<AttributeValue>> listOfValues = content.SpecObjects.Select(x => x.Values).ToList();
+                var searchResults = listOfValues.SelectMany(x => x).ToList().Where(s => s.ObjectValue.ToString().Contains(searchPhrase));
+                SearchResultsLV.ItemsSource = searchResults;
+                NavigationTabControl.SelectedIndex = 1;
+            }
+        }
+        #endregion
+
+        #region Events
+        private void Attribute_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            (sender as AttributeValueViewModel).AttributeValue.PropertyChanged += AttributeValue_PropertyChanged;
+            (sender as AttributeValueViewModel).AttributeValue.SpecElAt.Values.Add((sender as AttributeValueViewModel).AttributeValue);
+        }
+
+        private void AttributeValue_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            isContenChanged = true;
+        }
+
+        private void SpecObjects_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            isContenChanged = true;
+        }
+
+        void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            Commands.MainWindowCommands.BindCommandsToWindow(this);
+        }
+
+        public void SidePanel_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Expanded")
+            {
+                if ((sender as SidePanel).Expanded)
+                {
+                    AnimationHelper.AnimateGridColumnExpandCollapse(SidePanelColumn, true, 300, 0, 200, new TimeSpan(0, 0, 0, 0, 200));
+                    SidePanelSeperatorColumn.Width = new GridLength(5);
+                }
+                else
+                {
+                    AnimationHelper.AnimateGridColumnExpandCollapse(SidePanelColumn, false, 300, 0, 0, new TimeSpan(0, 0, 0, 0, 200));
+                    SidePanelSeperatorColumn.Width = new GridLength(0);
+                }
+            }
+
+        }
+
+        private void Row_DoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            Edit_SpecObject((sender as DataGridRow).DataContext as SpecobjectViewModel, false, "");
+
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            System.Diagnostics.Process.Start(e.Uri.ToString());
+        }
+        #endregion
+
         #region Callbacks
         private void Button_OpenFile_Click(object sender, RoutedEventArgs e)
         {
@@ -164,7 +269,12 @@ namespace ReqIF_Editor
                     dp = ListView.ItemsSourceProperty;
                     //Itemtemplate for EnumValue
                     FrameworkElementFactory subfactory = new FrameworkElementFactory(typeof(TextBlock));
-                    subfactory.SetBinding(TextBlock.TextProperty, new Binding("LongName"));
+                    subfactory.SetBinding(TextBlock.TextProperty, new Binding("LongName")
+                    {
+                        Mode = BindingMode.OneWay,
+                        NotifyOnSourceUpdated = true,
+                        UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                    });
                     DataTemplate dt = new DataTemplate()
                     {
                         VisualTree = subfactory
@@ -203,12 +313,14 @@ namespace ReqIF_Editor
                     dp = TextBlock.TextProperty;
                 }
                 factory.SetValue(IsEnabledProperty, false);
-                factory.SetBinding(dp, new Binding("Values[" + i++ + "].ObjectValue")
+                var binding = new Binding("Values[" + i++ + "].AttributeValue.ObjectValue");
+                binding.Mode = BindingMode.OneWay;
+                if (typeOfDataType == typeof(DatatypeDefinitionXHTML))
                 {
-                    Mode = BindingMode.OneWay,
-                    NotifyOnSourceUpdated = true,
-                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
-                });
+                    binding.Converter = new XHTMLConverter();
+                }
+                factory.SetBinding(dp, binding);
+
                 DataGridTemplateColumn dataGridTemplateColumn = new DataGridTemplateColumn()
                 {
                     Header = dataType.LongName,
@@ -218,73 +330,6 @@ namespace ReqIF_Editor
             }
         }
 
-        public void Add_SpecObject(string position)
-        {
-            SpecobjectViewModel specObject = new SpecobjectViewModel()
-            {
-                Identifier = Guid.NewGuid().ToString(),
-                LastChange = DateTime.Now,
-                //ReqIfContent = content,
-                //SpecType = content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault()
-            };
-            foreach (AttributeDefinition attributeDefinition in content.SpecTypes.First().SpecAttributes)
-            {
-                specObject.Values.Add(null);
-            }
-            Edit_SpecObject(specObject, true, position);
-        }
-
-        public void Edit_SpecObject(SpecobjectViewModel specObject, bool newSpecObject, string position = null)
-        {
-            SpecObjectViewerWindow SpecObjectViewer = new SpecObjectViewerWindow(specObject, newSpecObject, position);
-            SpecObjectViewer.Owner = Window.GetWindow(this);
-            SpecObjectViewer.Show();
-        }
-
-        private void Row_DoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            Edit_SpecObject((sender as DataGridRow).DataContext as SpecobjectViewModel, false, "");
-
-        }
-
-        private void ScrollToRow(SpecObject specObject)
-        {
-            MainDataGrid.SelectedItem = specObject;
-            MainDataGrid.ScrollIntoView(specObject);
-        }
-
-        private void SearchDocument()
-        {
-            string searchPhrase = SearchInputBox.Text;
-            if (searchPhrase != "")
-            {
-                List<List<AttributeValue>> listOfValues = content.SpecObjects.Select(x => x.Values).ToList();
-                var searchResults = listOfValues.SelectMany(x => x).ToList().Where(s => s.ObjectValue.ToString().Contains(searchPhrase));
-                SearchResultsLV.ItemsSource = searchResults;
-                NavigationTabControl.SelectedIndex = 1;
-            }
-        }
-
-        public void SidePanel_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == "Expanded")
-            {
-                if((sender as SidePanel).Expanded)
-                {
-                    AnimationHelper.AnimateGridColumnExpandCollapse(SidePanelColumn, true, 300, 0, 200, new TimeSpan(0, 0, 0, 0, 200));
-                    SidePanelSeperatorColumn.Width = new GridLength(5);
-                } else
-                {
-                    AnimationHelper.AnimateGridColumnExpandCollapse(SidePanelColumn, false, 300, 0, 0, new TimeSpan(0, 0, 0, 0, 200));
-                    SidePanelSeperatorColumn.Width = new GridLength(0);
-                }
-            }
-
-        }
-        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
-        {
-            System.Diagnostics.Process.Start(e.Uri.ToString());
-        }
         private void SetLanguageDictionary()
         {
             ResourceDictionary dict = new ResourceDictionary();
@@ -315,7 +360,7 @@ namespace ReqIF_Editor
     {
         public Html()
         {
-            using (var s = Assembly.GetExecutingAssembly().GetManifestResourceStream("ReqIF_Editor.Resources.text.css"))
+            using (var s = Assembly.GetExecutingAssembly().GetManifestResourceStream("ReqIF_Editor.Resources.htmlViewer.css"))
             {
                 using (StreamReader reader = new StreamReader(s))
                 {
@@ -339,20 +384,6 @@ namespace ReqIF_Editor
         }
     }
 
-    class HtmlHeading : TinyHtml.Wpf.WpfHtmlControl
-    {
-        public HtmlHeading()
-        {
-            using (var s = Assembly.GetExecutingAssembly().GetManifestResourceStream("ReqIF_Editor.Resources.heading.css"))
-            {
-                using (StreamReader reader = new StreamReader(s))
-                {
-                    SetMasterStylesheet(reader.ReadToEnd());
-                }
-            }
-        }
-    }
-
     public class HtmlCellTemplateSelector : DataTemplateSelector
     {
         private int _chapterIndex;
@@ -367,42 +398,37 @@ namespace ReqIF_Editor
         {
             ContentPresenter presenter = container as ContentPresenter;
             DataGridCell cell = presenter.Parent as DataGridCell;
+            Binding binding;
 
-            if ((cell.DataContext as SpecobjectViewModel).Values.SingleOrDefault(x => x?.AttributeDefinition.LongName == "ReqIF.ChapterName") != null)
+            if ((cell.DataContext as SpecobjectViewModel).Values.SingleOrDefault(x => x?.AttributeDefinition.LongName == "ReqIF.ChapterName").AttributeValue != null)
             {
-                Binding binding = new Binding("Values[" + _chapterIndex + "].TheValue")
+                binding = new Binding("Values[" + _chapterIndex + "].AttributeValue.ObjectValue")
                 {
-                    //Converter = new SpecObjectValueConverter((cell.DataContext as SpecObject).SpecType.SpecAttributes.Where(x => x.LongName == "ReqIF.ChapterName").FirstOrDefault().Identifier),
                     Mode = BindingMode.OneWay,
                     NotifyOnSourceUpdated = true,
-                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                    Converter = new XHTMLConverter(),
+                    ConverterParameter = "heading"
                 };
-                var factory = new FrameworkElementFactory(typeof(HtmlHeading));
-                factory.SetBinding(HtmlHeading.HtmlProperty, binding);
-
-                DataTemplate cellTemplate = new DataTemplate()
-                {
-                    VisualTree = factory
-                };
-                return cellTemplate;
             } else {
-                Binding binding = new Binding("Values[" + _textIndex + "].TheValue")
+                binding = new Binding("Values[" + _textIndex + "].AttributeValue.ObjectValue")
                 {
-                    //Converter = new SpecObjectValueConverter((cell.DataContext as SpecObject).SpecType.SpecAttributes.Where(x => x.LongName == "ReqIF.Text").FirstOrDefault().Identifier),
                     Mode = BindingMode.OneWay,
                     NotifyOnSourceUpdated = true,
-                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                    Converter = new XHTMLConverter()
                 };
-                var factory = new FrameworkElementFactory(typeof(Html));
-                factory.SetBinding(Html.HtmlProperty, binding);
 
-                DataTemplate cellTemplate = new DataTemplate()
-                {
-                    VisualTree = factory
-                };
-                return cellTemplate;
             }
-            
+            var factory = new FrameworkElementFactory(typeof(Html));
+            factory.SetBinding(Html.HtmlProperty, binding);
+
+            DataTemplate cellTemplate = new DataTemplate()
+            {
+                VisualTree = factory
+            };
+            return cellTemplate;
+
         }
 
     }
