@@ -18,13 +18,18 @@ namespace ReqIF_Editor
 {
     public class XHTMLConverter : IValueConverter
     {
+        Assembly assembly = Assembly.GetExecutingAssembly();
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             if (value.GetType() == typeof(string))
             {
                 string html = (string)value;
-                string removeNamespaces = transformXHTML(html, "ReqIF_Editor.XSLT.NamespaceTrimmer.xslt");
-                string ObjectToImg = transformXHTML(removeNamespaces, "ReqIF_Editor.XSLT.ObjectToImg.xslt");
+                string removeNamespaces = html.xslTransform(XmlReader.Create(assembly.GetManifestResourceStream("ReqIF_Editor.XSLT.NamespaceTrimmer.xslt")));
+                string ObjectToImg = removeNamespaces.xslTransform(XmlReader.Create(assembly.GetManifestResourceStream("ReqIF_Editor.XSLT.ObjectToImg.xslt")));
+                if((string)parameter == "heading")
+                {
+                    ObjectToImg = ObjectToImg.xslTransform(XmlReader.Create(assembly.GetManifestResourceStream("ReqIF_Editor.XSLT.AddClassToDiv.xslt")));
+                }
                 return ObjectToImg;
             }
             else return null;
@@ -39,43 +44,16 @@ namespace ReqIF_Editor
                 html = Regex.Replace(html, "<([^>]*)>", m => "<" + m.Groups[1].Value.ToLower() + ">");
                 //Replace <br> with <br />
                 html = Regex.Replace(html, "<(br[^>]*)>", "<br />");
-                string addNamespace = transformXHTML(html, "ReqIF_Editor.XSLT.AddNamespace.xslt");
-                string ImgToObject = transformXHTML(addNamespace, "ReqIF_Editor.XSLT.ImgToObject.xslt");
+                
+                string addNamespace = html.xslTransform(XmlReader.Create(assembly.GetManifestResourceStream("ReqIF_Editor.XSLT.AddNamespace.xslt")));
+                string ImgToObject = html.xslTransform(XmlReader.Create(assembly.GetManifestResourceStream("ReqIF_Editor.XSLT.ImgToObject.xslt")));
                 return ImgToObject;
             }
             else return null;
         }
 
-        private string transformXHTML(string input, string xsltSource)
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            XslCompiledTransform xslt = new XslCompiledTransform();
-            xslt.Load(XmlReader.Create(assembly.GetManifestResourceStream(xsltSource)));
-            using (MemoryStream msInput = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(input)))
-            {
-                try
-                {
-                    XPathDocument xpathdocument = new XPathDocument(msInput);
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        using (XmlTextWriter writer = new XmlTextWriter(ms, new UTF8Encoding(false)))
-                        {
-                            writer.Formatting = Formatting.Indented;
-
-                            xslt.Transform(xpathdocument, null, writer, null);
-                        }
-                        return Encoding.UTF8.GetString(ms.ToArray());
-                    }
-                }
-                catch (System.Xml.XmlException e)
-                {
-                    MessageBox.Show(e.Message, "Fehler in XHTML",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                    return input;
-                }
-            }
-        }
     }
+
 
     public class TextAndChapterNameConverter : IMultiValueConverter
     {

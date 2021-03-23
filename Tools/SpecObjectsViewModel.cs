@@ -28,19 +28,16 @@ namespace ReqIF_Editor
                     AlternativeId = specObject.AlternativeId,
                     Description = specObject.Description,
                     LastChange = specObject.LastChange,
-                    LongName = specObject.LongName
+                    LongName = specObject.LongName,
+                    ReqIfContent = specObject.ReqIfContent,
+                    Type = specObject.Type,
+                    SpecType = specObject.SpecType
                 };
                 foreach (AttributeDefinition attributeDefinition in content.SpecTypes.First().SpecAttributes)
                 {
                     AttributeValue attributeValue = specObject.Values.Where(x => x.AttributeDefinition == attributeDefinition).FirstOrDefault();
-                    if(attributeValue?.GetType() == typeof(AttributeValueXHTML))
-                    {
-                        var assembly = Assembly.GetExecutingAssembly();
-                        string removeNamespaces =((string)attributeValue.ObjectValue).xslTransform(XmlReader.Create(assembly.GetManifestResourceStream("ReqIF_Editor.XSLT.NamespaceTrimmer.xslt")));
-                        string ObjectToImg = removeNamespaces.xslTransform(XmlReader.Create(assembly.GetManifestResourceStream("ReqIF_Editor.XSLT.ObjectToImg.xslt")));
-                        attributeValue.ObjectValue = ObjectToImg;
-                    }
-                    specobjectViewModel.Values.Add(attributeValue);
+
+                    specobjectViewModel.Values.Add(new AttributeValueViewModel() { AttributeValue = attributeValue, AttributeDefinition = attributeDefinition });
                 }
                 this.SpecObjects.Add(specobjectViewModel);
             }
@@ -59,28 +56,36 @@ namespace ReqIF_Editor
             }
         }
     }
-    public class SpecobjectViewModel : Identifiable, INotifyPropertyChanged
+    public class SpecobjectViewModel : SpecObject
     {
-        private ObservableCollection<AttributeValue> values = new ObservableCollection<AttributeValue>();
+        private ObservableCollection<AttributeValueViewModel> values = new ObservableCollection<AttributeValueViewModel>();
 
-        public ObservableCollection<AttributeValue> Values
+        public new ObservableCollection<AttributeValueViewModel> Values
         {
             get
             {
                 return this.values;
             }
-            set
-            {
-                if (values == value)
-                    return;
-                values = value;
-                NotifyPropertyChanged();
-            }
         }
+    }
+    public class AttributeValueViewModel : INotifyPropertyChanged
+    {
+        private AttributeDefinition _attributeDefinition;
+        private AttributeValue _attributeValue;
+
+        public AttributeDefinition AttributeDefinition
+        {
+            get { return _attributeDefinition; }
+            set { _attributeDefinition = value; }
+        }
+        public AttributeValue AttributeValue
+        {
+            get { return _attributeValue; }
+            set { _attributeValue = value; NotifyPropertyChanged(); }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
-        // This method is called by the Set accessor of each property.
-        // The CallerMemberName attribute that is applied to the optional propertyName
-        // parameter causes the property name of the caller to be substituted as an argument.
+
         protected void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
         {
             if (PropertyChanged != null)

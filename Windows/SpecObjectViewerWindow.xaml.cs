@@ -9,6 +9,10 @@ using System.Windows.Data;
 using Microsoft.CSharp;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Media;
+using System.Windows.Controls.Primitives;
+using Smith.WPF.HtmlEditor;
+using Xceed.Wpf.Toolkit;
 
 namespace ReqIF_Editor
 {
@@ -20,26 +24,29 @@ namespace ReqIF_Editor
         private bool _newSpecObject;
         private SpecobjectViewModel _specObject;
         private string _position;
-        private ObservableCollection<SpecObjectValueModel> _attributes;
+        private ObservableCollection<AttributeValueViewModel> _attributes;
+        private List<AttributeDefinition> _newAttributeValues;
         public SpecObjectViewerWindow(SpecobjectViewModel specObject, bool newSpecObject, string position = null)
         {
             InitializeComponent();
-            _attributes = new ObservableCollection<SpecObjectValueModel>();
-            int i = 0;
-            foreach(var value in specObject.Values)
+
+            _newAttributeValues = new List<AttributeDefinition>();
+
+            //Create temporary collection of attributes
+            _attributes = new ObservableCollection<AttributeValueViewModel>();
+            foreach (var value in specObject.Values)
             {
-                var definition = (Application.Current.MainWindow as MainWindow).content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault().SpecAttributes[i++];
-                _attributes.Add(new SpecObjectValueModel()
+                if(value.AttributeValue != null)
                 {
-                    AttributeDefinition = definition,
-                    AttributeValue = value,
-                    hasChanged = false
-                });
-            }
-            //Register property changed event for every value
-            foreach (var attribute in _attributes)
-            {
-                attribute.PropertyChanged += AttributeValue_PropertyChanged;
+                    _attributes.Add(value);
+                } else
+                {
+                    _attributes.Add(new AttributeValueViewModel()
+                    {
+                        AttributeValue = null,
+                        AttributeDefinition = value.AttributeDefinition
+                    });
+                }
             }
             DataTable.ItemsSource = _attributes;
             InfoExpander.DataContext = specObject;
@@ -97,34 +104,56 @@ namespace ReqIF_Editor
                 //    currentIndex = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedIndex;
 
                 //}
-                    (Application.Current.MainWindow as MainWindow).contenModel.SpecObjects.Insert(currentIndex + 1, _specObject);
-            }
-            int i = 0;
-            foreach(var attribute in _attributes)
-            {
-                if (attribute.AttributeValue != null)
-                {
-                    _specObject.Values[i] = attribute.AttributeValue;
-                    _specObject.LastChange = DateTime.Now;
-                }
-                i++;
+                    (Application.Current.MainWindow as MainWindow).specObjectsViewModel.SpecObjects.Insert(currentIndex + 1, _specObject);
             }
 
+            // Add new AttributeValues to SpecObject
+            foreach(var definition in _newAttributeValues)
+            {
+                _specObject.Values.Single(x => x.AttributeDefinition == definition).AttributeValue = _attributes.Single(x => x.AttributeDefinition == definition).AttributeValue;
+            }
+
+            // Update binding sources
+            var dataFields = DataTable.FindAllVisualDescendants()
+                .Where(elt => elt.Name == "dataField");
+            foreach (var dataField in dataFields)
+            {
+                BindingExpression binding = null;
+                if ((dataField.DataContext as AttributeValue).GetType() == typeof(AttributeValueBoolean)){
+                    binding = dataField.GetBindingExpression(CheckBox.IsCheckedProperty);
+                }
+                else if((dataField.DataContext as AttributeValue).GetType() == typeof(AttributeValueXHTML))
+                {
+                    binding = dataField.GetBindingExpression(HtmlEditor.BindingContentProperty);
+                }
+                else if ((dataField.DataContext as AttributeValue).GetType() == typeof(AttributeValueEnumeration))
+                {
+                    binding = dataField.GetBindingExpression(ListBox.SelectedItemProperty);
+                }
+                else if ((dataField.DataContext as AttributeValue).GetType() == typeof(AttributeValueString))
+                {
+                    binding = dataField.GetBindingExpression(TextBox.TextProperty);
+                }
+                else if ((dataField.DataContext as AttributeValue).GetType() == typeof(AttributeValueDate))
+                {
+                    binding = dataField.GetBindingExpression(DateTimePicker.ValueProperty);
+                }
+                else if ((dataField.DataContext as AttributeValue).GetType() == typeof(AttributeValueInteger))
+                {
+                    binding = dataField.GetBindingExpression(LongUpDown.ValueProperty);
+                }
+                else if ((dataField.DataContext as AttributeValue).GetType() == typeof(AttributeValueReal))
+                {
+                    binding = dataField.GetBindingExpression(DoubleUpDown.ValueProperty);
+                }
+                binding.UpdateSource();
+            }
+
+            //Update LastChange of SpecObject
+            _specObject.LastChange = DateTime.Now;
             Close();
         }
-
-        private void AttributeValue_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if(sender.GetType() == typeof(SpecObjectValueModel))
-            {
-                (sender as SpecObjectValueModel).hasChanged = true;
-            }
-        }
-
-        private void SpecObjectViewerWindow_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            (Application.Current.MainWindow as MainWindow).isContenChanged = true;
-        }
+        
 
         private void CancelSpecObjectButton_Click(object sender, RoutedEventArgs e)
         {
@@ -133,7 +162,8 @@ namespace ReqIF_Editor
 
         private void AddSpecObjectButton_Click(object sender, RoutedEventArgs e)
         {
-            AttributeDefinition selectedAttribute = ((sender as Button).DataContext as SpecObjectValueModel).AttributeDefinition;
+            var dataGridRowIndex = ((sender as Button).BindingGroup.Owner as DataGridRow).GetIndex();
+            AttributeDefinition selectedAttribute = _attributes[dataGridRowIndex].AttributeDefinition;
             AttributeValue attributeValue = null;
             if (selectedAttribute.GetType() == typeof(AttributeDefinitionBoolean))
             {
@@ -172,42 +202,11 @@ namespace ReqIF_Editor
                 attributeValue.ObjectValue = "<div></div>";
             }
             attributeValue.AttributeDefinition = selectedAttribute;
-            _attributes.Single(x => x.AttributeDefinition == selectedAttribute).AttributeValue = attributeValue;
-            DataTable.Items.Refresh();
+            attributeValue.SpecElAt = (Application.Current.MainWindow as MainWindow).content.SpecObjects.Single(x => x.Identifier == _specObject.Identifier);
+            _attributes[dataGridRowIndex].AttributeValue = attributeValue;
+            _newAttributeValues.Add(selectedAttribute);
         }
 
     }
 
-    class SpecObjectValueModel : INotifyPropertyChanged
-    {
-        private AttributeDefinition _attributeDefinition;
-        private AttributeValue _attributeValue;
-        private bool _hasChanged;
-
-        public AttributeDefinition AttributeDefinition
-        {
-            get { return _attributeDefinition; }
-            set { _attributeDefinition = value;}
-        }
-        public AttributeValue AttributeValue
-        {
-            get { return _attributeValue; }
-            set { _attributeValue = value; NotifyPropertyChanged(); }
-        }
-        public bool hasChanged
-        {
-            get { return _hasChanged; }
-            set { _hasChanged = value;}
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
 }
