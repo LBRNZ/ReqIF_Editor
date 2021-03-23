@@ -114,6 +114,7 @@ namespace ReqIF_Editor
 
         private void ScrollToRow(SpecObject specObject)
         {
+            specObject = specObjectsViewModel.SpecObjects.Single(x => x.Identifier == specObject.Identifier);
             MainDataGrid.SelectedItem = specObject;
             MainDataGrid.ScrollIntoView(specObject);
         }
