@@ -96,11 +96,15 @@ namespace ReqIF_Editor
             SpecobjectViewModel specObject = new SpecobjectViewModel()
             {
                 Identifier = Guid.NewGuid().ToString(),
-                LastChange = DateTime.Now,
+                LastChange = DateTime.Now
             };
             foreach (AttributeDefinition attributeDefinition in content.SpecTypes.First().SpecAttributes)
             {
-                specObject.Values.Add(null);
+                specObject.Values.Add(new AttributeValueViewModel()
+                {
+                    AttributeValue = null,
+                    AttributeDefinition = attributeDefinition
+                });
             }
             Edit_SpecObject(specObject, true, position);
         }
