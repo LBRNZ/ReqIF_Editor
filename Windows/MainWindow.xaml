@@ -273,7 +273,8 @@
                       x:Name="MainDataGrid"
                       AutoGenerateColumns="False"
                       SelectionMode="Single"
-                      CanUserAddRows="false">
+                      CanUserAddRows="false"
+                      >
                 <!--<DataGrid.RowDetailsTemplate>
                     <DataTemplate>
                         <DataGrid ItemsSource="{Binding SelectedItem,ElementName=MainDataGrid}" x:Name="DataGridDetail" AutoGenerateColumns="False">

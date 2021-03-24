@@ -53,9 +53,9 @@ namespace ReqIF_Editor
         public void Deserialize(string filepath)
         {
             ReqIFDeserializer deserializer = new ReqIFDeserializer();
-            reqif = deserializer.Deserialize(filepath);
-            header = reqif.TheHeader.FirstOrDefault(); ;
-            content = reqif.CoreContent.FirstOrDefault();
+            reqif = deserializer.Deserialize(filepath).First();
+            header = reqif.TheHeader;
+            content = reqif.CoreContent;
             embeddedObjects = reqif.EmbeddedObjects;
 
             PropertyGrid.DataContext = header;
@@ -376,11 +376,11 @@ namespace ReqIF_Editor
         protected override Stream OnLoadResource(string url)
         {
             MemoryStream memoryStream = new MemoryStream();
-            var embeddedObject = ((MainWindow)System.Windows.Application.Current.MainWindow).embeddedObjects.Find(x => x.ImageName == url);
+            var embeddedObject = ((MainWindow)System.Windows.Application.Current.MainWindow).embeddedObjects.Find(x => x.Name == url);
             if(embeddedObject != null)
             {
-                embeddedObject.PreviewImage.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
-                return memoryStream;
+                embeddedObject.ObjectValue.Position = 0;
+                return embeddedObject.ObjectValue;
             } else
             {
                 Properties.Resources.Document_notFound.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);

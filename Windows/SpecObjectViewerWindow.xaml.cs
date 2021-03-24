@@ -72,8 +72,7 @@ namespace ReqIF_Editor
                     Description = _specObject.Description,
                     Identifier = _specObject.Identifier,
                     LastChange = _specObject.LastChange,
-                    Type = currentObject.Type,
-                    ReqIfContent = currentObject.ReqIfContent
+                    Type = currentObject.Type
 
                 };
                 foreach (var attribute in _attributes)

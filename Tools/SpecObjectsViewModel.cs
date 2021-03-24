@@ -29,7 +29,6 @@ namespace ReqIF_Editor
                     Description = specObject.Description,
                     LastChange = specObject.LastChange,
                     LongName = specObject.LongName,
-                    ReqIfContent = specObject.ReqIfContent,
                     Type = specObject.Type,
                     SpecType = specObject.SpecType
                 };
