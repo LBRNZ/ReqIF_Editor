@@ -11,6 +11,7 @@
     <system:String x:Key="navigation">Navigation</system:String>
     <system:String x:Key="search">Search</system:String>
     <system:String x:Key="save">Save</system:String>
+    <system:String x:Key="apply">Apply</system:String>
     <system:String x:Key="content">Content</system:String>
     <system:String x:Key="requirement">Requirement</system:String>
     <system:String x:Key="edit">Edit</system:String>

@@ -163,7 +163,7 @@
         </DataGrid>
         <DockPanel Grid.Row="2" LastChildFill="False">
             <Button x:Name="SaveSpecObject_Button"
-                    Content="{DynamicResource save}"
+                    Content="{DynamicResource apply}"
                     Height="30"
                     Margin="5"
                     Padding="5"

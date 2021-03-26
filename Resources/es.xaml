@@ -11,6 +11,7 @@
     <system:String x:Key="navigation">Navegación</system:String>
     <system:String x:Key="search">búsqueda</system:String>
     <system:String x:Key="save">Guardar</system:String>
+    <system:String x:Key="apply">Aplicar</system:String>
     <system:String x:Key="content">Contenido</system:String>
     <system:String x:Key="requirement">requisito</system:String>
     <system:String x:Key="edit">editar</system:String>
