@@ -331,6 +331,10 @@ namespace ReqIF_Editor
                     Header = dataType.LongName,
                     CellTemplate = new DataTemplate() { VisualTree = factory }
                 };
+                if(typeOfDataType == typeof(DatatypeDefinitionXHTML))
+                {
+                    dataGridTemplateColumn.Width = 300;
+                }
                 MainDataGrid.Columns.Add(dataGridTemplateColumn);
             }
         }
