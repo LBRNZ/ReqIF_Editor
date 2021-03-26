@@ -32,7 +32,7 @@ namespace ReqIF_Editor
                     Type = specObject.Type,
                     SpecType = specObject.SpecType
                 };
-                foreach (AttributeDefinition attributeDefinition in content.SpecTypes.First().SpecAttributes)
+                foreach (AttributeDefinition attributeDefinition in content.SpecTypes.Single(x => x == specObject.SpecType).SpecAttributes)
                 {
                     AttributeValue attributeValue = specObject.Values.Where(x => x.AttributeDefinition == attributeDefinition).FirstOrDefault();
 
