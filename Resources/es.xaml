@@ -29,7 +29,8 @@
     <system:String x:Key="title">Título</system:String>
     <system:String x:Key="cancel">Cancelar</system:String>
     <system:String x:Key="ok">OK</system:String>
-    <system:String x:Key="addAttribute">añadir atributo</system:String>
+    <system:String x:Key="addAttribute">Añadir atributo</system:String>
+    <system:String x:Key="removeAttribute">Eliminar atributo</system:String>
     <system:String x:Key="selectAttribute">atributo de selección</system:String>
     <system:String x:Key="attributes">atributo</system:String>
     <system:String x:Key="values">valores</system:String>

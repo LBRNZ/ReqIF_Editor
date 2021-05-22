@@ -156,4 +156,21 @@ namespace ReqIF_Editor
             throw new NotSupportedException("Cannot convert back");
         }
     }
+
+    public class ValueToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value == null)
+            {
+                return Visibility.Hidden;
+            }
+            return Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotSupportedException("Cannot convert back");
+        }
+    }
 }

@@ -422,5 +422,17 @@
             </DrawingGroup>
         </DrawingImage.Drawing>
     </DrawingImage>
+    <DrawingImage x:Key="MinusIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Transform>
+                    <MatrixTransform Matrix="1.3333333,0,0,-1.3333333,0,170.66667"/>
+                </DrawingGroup.Transform>
+                <DrawingGroup ClipGeometry="F1 M0,128 L128,128 128,0 0,0 z">
+                    <GeometryDrawing Brush="#FFE84613" Geometry="F1 M10,71.5 L118,71.5 118,56.5 10,56.5 z M64,128 C28.653,128 0,99.347 0,64 0,28.654 28.653,0 64,0 99.346,0 128,28.654 128,64 128,99.347 99.346,128 64,128"/>
+                </DrawingGroup>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
 
 </ResourceDictionary>

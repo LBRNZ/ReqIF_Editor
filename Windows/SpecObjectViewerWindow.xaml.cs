@@ -21,151 +21,90 @@ namespace ReqIF_Editor
     /// </summary>
     public partial class SpecObjectViewerWindow : Window
     {
-        private bool _newSpecObject;
         private SpecobjectViewModel _specObject;
-        private string _position;
         private ObservableCollection<AttributeValueViewModel> _attributes;
-        private List<AttributeDefinition> _newAttributeValues;
-        public SpecObjectViewerWindow(SpecobjectViewModel specObject, bool newSpecObject, string position = null)
+        public SpecObjectViewerWindow(SpecobjectViewModel specObject)
         {
             InitializeComponent();
 
-            _newAttributeValues = new List<AttributeDefinition>();
-            _newSpecObject = newSpecObject;
             _specObject = specObject;
-            _position = position;
 
             //Create temporary collection of attributes
             _attributes = new ObservableCollection<AttributeValueViewModel>();
             foreach (var value in specObject.Values)
             {
-                if(value.AttributeValue != null)
+                AttributeValue AttributeValue;
+                if (value.AttributeValue != null)
                 {
-                    _attributes.Add(value);
+                    AttributeValue = value.AttributeValue.Clone();
+                    AttributeValue.PropertyChanged += AttributeValue_PropertyChanged;
+
                 } else
                 {
-                    _attributes.Add(new AttributeValueViewModel()
-                    {
-                        AttributeValue = null,
-                        AttributeDefinition = value.AttributeDefinition
-                    });
+                    AttributeValue = null;
                 }
+                _attributes.Add(new AttributeValueViewModel()
+                {
+                    AttributeValue = AttributeValue,
+                    AttributeDefinition = value.AttributeDefinition
+                });
             }
             DataTable.ItemsSource = _attributes;
             InfoExpander.DataContext = specObject;
 
         }
 
+        private void AttributeValue_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var AttrDef = (sender as AttributeValue).AttributeDefinition;
+            _attributes.Single(x => x.AttributeDefinition == AttrDef).changed = true;
+        }
 
         private void SaveSpecObject_Button_Click(object sender, RoutedEventArgs e)
         {
-            if (_newSpecObject)
+            // Add new AttributeValues to SpecObject and update changed AttributeValues
+            foreach (var definition in _attributes.Where(x => x.added == true || x.changed == true))
             {
-                int currentIndex = 0;
-                SpecobjectViewModel currentModelObject = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedItem as SpecobjectViewModel;
-                SpecObject currentObject = (Application.Current.MainWindow as MainWindow).content.SpecObjects.Single(x => x.Identifier == currentModelObject.Identifier);
-                var specifications = (Application.Current.MainWindow as MainWindow).content.Specifications;
-
-                //Create new SpecObject and add Attributes
-                SpecObject newSpecObject = new SpecObject()
-                {
-                    Description = _specObject.Description,
-                    Identifier = _specObject.Identifier,
-                    LastChange = _specObject.LastChange,
-                    Type = currentObject.Type
-
-                };
-                foreach (var attribute in _attributes)
-                {
-                    if(attribute.AttributeValue != null)
-                        newSpecObject.Values.Add(attribute.AttributeValue);
-                }
-
-                //Add SpecObject to SpecHierarchy and to SpecObjects
-                SpecHierarchy specHierarchy = specifications.First().Children.First().Descendants()
-                .Where(node => node.Object == currentObject).First();
-                if (_position == "after")
-                {
-                    SpecHierarchy parentSpecHierarchy = specHierarchy.Container;
-                    int specHierarchyIndex = parentSpecHierarchy.Children.IndexOf(specHierarchy);
-                    parentSpecHierarchy.Children.Insert(specHierarchyIndex + 1, new SpecHierarchy()
-                    {
-                        Object = newSpecObject,
-                        Identifier = Guid.NewGuid().ToString(),
-                        LastChange = DateTime.Now
-                    });
-                    var previousObject = specHierarchy.Descendants().Last().Object;
-                    currentIndex = (Application.Current.MainWindow as MainWindow).content.SpecObjects.IndexOf(previousObject);
-                }
-                else if (_position == "under")
-                {
-                    specHierarchy.Children.Insert(0, new SpecHierarchy()
-                    {
-                        Object = newSpecObject,
-                        Identifier = Guid.NewGuid().ToString(),
-                        LastChange = DateTime.Now
-                    });
-                    currentIndex = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedIndex;
-
-                }
-                (Application.Current.MainWindow as MainWindow).specObjectsViewModel.SpecObjects.Insert(currentIndex + 1, _specObject);
-                (Application.Current.MainWindow as MainWindow).content.SpecObjects.Insert(currentIndex + 1, newSpecObject);
+                _specObject.Values.Single(x => x.AttributeDefinition == definition.AttributeDefinition).AttributeValue
+                    = _attributes.Single(x => x.AttributeDefinition == definition.AttributeDefinition).AttributeValue;
+                _specObject.Values.Single(x => x.AttributeDefinition == definition.AttributeDefinition).changed = definition.changed;
+                _specObject.Values.Single(x => x.AttributeDefinition == definition.AttributeDefinition).added = definition.added;
             }
 
-            // Add new AttributeValues to SpecObject
-            foreach(var definition in _newAttributeValues)
+            // Remove AttributeValues from SpecObject
+            foreach (var definition in _attributes.Where(x => x.removed == true))
             {
-                _specObject.Values.Single(x => x.AttributeDefinition == definition).AttributeValue = _attributes.Single(x => x.AttributeDefinition == definition).AttributeValue;
-            }
-
-            // Update binding sources
-            var dataFields = DataTable.FindAllVisualDescendants()
-                .Where(elt => elt.Name == "dataField");
-            foreach (var dataField in dataFields)
-            {
-                BindingExpression binding = null;
-                if ((dataField.DataContext as AttributeValue).GetType() == typeof(AttributeValueBoolean)){
-                    binding = dataField.GetBindingExpression(CheckBox.IsCheckedProperty);
-                }
-                else if((dataField.DataContext as AttributeValue).GetType() == typeof(AttributeValueXHTML))
-                {
-                    binding = dataField.GetBindingExpression(HtmlEditor.BindingContentProperty);
-                }
-                else if ((dataField.DataContext as AttributeValue).GetType() == typeof(AttributeValueEnumeration))
-                {
-                    binding = dataField.GetBindingExpression(ListBox.SelectedItemProperty);
-                }
-                else if ((dataField.DataContext as AttributeValue).GetType() == typeof(AttributeValueString))
-                {
-                    binding = dataField.GetBindingExpression(TextBox.TextProperty);
-                }
-                else if ((dataField.DataContext as AttributeValue).GetType() == typeof(AttributeValueDate))
-                {
-                    binding = dataField.GetBindingExpression(DateTimePicker.ValueProperty);
-                }
-                else if ((dataField.DataContext as AttributeValue).GetType() == typeof(AttributeValueInteger))
-                {
-                    binding = dataField.GetBindingExpression(LongUpDown.ValueProperty);
-                }
-                else if ((dataField.DataContext as AttributeValue).GetType() == typeof(AttributeValueReal))
-                {
-                    binding = dataField.GetBindingExpression(DoubleUpDown.ValueProperty);
-                }
-                binding.UpdateSource();
+                _specObject.Values.Single(x => x.AttributeDefinition == definition.AttributeDefinition).AttributeValue = null;
+                _specObject.Values.Single(x => x.AttributeDefinition == definition.AttributeDefinition).removed = true;
             }
 
             //Update LastChange of SpecObject
             _specObject.LastChange = DateTime.Now;
+
+            DialogResult = true;
             Close();
         }
-        
+
+        private void RemoveAttributeButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dataGridRowIndex = ((sender as Button).BindingGroup.Owner as DataGridRow).GetIndex();
+            _attributes[dataGridRowIndex].AttributeValue = null;
+            if (_attributes[dataGridRowIndex].added != true)
+            {
+                _attributes[dataGridRowIndex].removed = true;
+                _attributes[dataGridRowIndex].added = false;
+            }
+
+            
+        }
 
         private void CancelSpecObjectButton_Click(object sender, RoutedEventArgs e)
         {
+            DialogResult = false;
             Close();
         }
 
-        private void AddSpecObjectButton_Click(object sender, RoutedEventArgs e)
+        private void AddAttributeButton_Click(object sender, RoutedEventArgs e)
         {
             var dataGridRowIndex = ((sender as Button).BindingGroup.Owner as DataGridRow).GetIndex();
             AttributeDefinition selectedAttribute = _attributes[dataGridRowIndex].AttributeDefinition;
@@ -209,7 +148,8 @@ namespace ReqIF_Editor
             attributeValue.AttributeDefinition = selectedAttribute;
             attributeValue.SpecElAt = (Application.Current.MainWindow as MainWindow).content.SpecObjects.SingleOrDefault(x => x.Identifier == _specObject.Identifier);
             _attributes[dataGridRowIndex].AttributeValue = attributeValue;
-            _newAttributeValues.Add(selectedAttribute);
+            _attributes[dataGridRowIndex].added = true;
+
         }
 
     }

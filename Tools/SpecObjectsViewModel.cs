@@ -71,6 +71,9 @@ namespace ReqIF_Editor
     {
         private AttributeDefinition _attributeDefinition;
         private AttributeValue _attributeValue;
+        private bool _added;
+        private bool _removed;
+        private bool _changed;
 
         public AttributeDefinition AttributeDefinition
         {
@@ -81,6 +84,21 @@ namespace ReqIF_Editor
         {
             get { return _attributeValue; }
             set { _attributeValue = value; NotifyPropertyChanged(); }
+        }
+        public bool added
+        {
+            get { return _added; }
+            set { _added = value; NotifyPropertyChanged(); }
+        }
+        public bool removed
+        {
+            get { return _removed; }
+            set { _removed = value; NotifyPropertyChanged(); }
+        }
+        public bool changed
+        {
+            get { return _changed; }
+            set { _changed = value; NotifyPropertyChanged(); }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

@@ -109,11 +109,84 @@ namespace ReqIF_Editor
             Edit_SpecObject(specObject, true, position);
         }
 
-        public void Edit_SpecObject(SpecobjectViewModel specObject, bool newSpecObject, string position = null)
+        public void Edit_SpecObject(SpecobjectViewModel specObject, bool createSpecObject, string position = null)
         {
-            SpecObjectViewerWindow SpecObjectViewer = new SpecObjectViewerWindow(specObject, newSpecObject, position);
+            SpecObjectViewerWindow SpecObjectViewer = new SpecObjectViewerWindow(specObject);
             SpecObjectViewer.Owner = Window.GetWindow(this);
-            SpecObjectViewer.Show();
+            if (SpecObjectViewer.ShowDialog() == true)
+            {
+                if (createSpecObject)
+                {
+                    int currentIndex = 0;
+                    SpecobjectViewModel currentModelObject = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedItem as SpecobjectViewModel;
+                    SpecObject currentObject = (Application.Current.MainWindow as MainWindow).content.SpecObjects.Single(x => x.Identifier == currentModelObject.Identifier);
+                    var specifications = (Application.Current.MainWindow as MainWindow).content.Specifications;
+
+                    //Create new SpecObject and add Attributes
+                    SpecObject newSpecObject = new SpecObject()
+                    {
+                        Description = specObject.Description,
+                        Identifier = specObject.Identifier,
+                        LastChange = specObject.LastChange,
+                        Type = currentObject.Type
+
+                    };
+                    foreach (var attribute in specObject.Values)
+                    {
+                        if (attribute.AttributeValue != null)
+                            newSpecObject.Values.Add(attribute.AttributeValue);
+                    }
+
+                    //Add SpecObject to SpecHierarchy and to SpecObjects
+                    SpecHierarchy specHierarchy = specifications.First().Children.First().Descendants()
+                    .Where(node => node.Object == currentObject).First();
+                    if (position == "after")
+                    {
+                        SpecHierarchy parentSpecHierarchy = specHierarchy.Container;
+                        int specHierarchyIndex = parentSpecHierarchy.Children.IndexOf(specHierarchy);
+                        parentSpecHierarchy.Children.Insert(specHierarchyIndex + 1, new SpecHierarchy()
+                        {
+                            Object = newSpecObject,
+                            Identifier = Guid.NewGuid().ToString(),
+                            LastChange = DateTime.Now
+                        });
+                        var previousObject = specHierarchy.Descendants().Last().Object;
+                        currentIndex = (Application.Current.MainWindow as MainWindow).content.SpecObjects.IndexOf(previousObject);
+                    }
+                    else if (position == "under")
+                    {
+                        specHierarchy.Children.Insert(0, new SpecHierarchy()
+                        {
+                            Object = newSpecObject,
+                            Identifier = Guid.NewGuid().ToString(),
+                            LastChange = DateTime.Now
+                        });
+                        currentIndex = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedIndex;
+
+                    }
+                    this.specObjectsViewModel.SpecObjects.Insert(currentIndex + 1, specObject);
+                    this.content.SpecObjects.Insert(currentIndex + 1, newSpecObject);
+                } else
+                {
+                    var originalSpecObject = content.SpecObjects.Single(x => x.Identifier == specObject.Identifier);
+                    //Update changed AttributeValues
+                    foreach (var definition in specObject.Values.Where(x => x.changed == true))
+                    {
+                        originalSpecObject.Values.Single(x => x.AttributeDefinition == definition.AttributeDefinition).ObjectValue
+                            = specObject.Values.Single(x => x.AttributeDefinition == definition.AttributeDefinition).AttributeValue.ObjectValue;
+                    }
+                    //Add new AttributeValues to original SpecObject
+                    foreach (var definition in specObject.Values.Where(x => x.added == true))
+                    {
+                        originalSpecObject.Values.Add(specObject.Values.Single(x => x.AttributeDefinition == definition.AttributeDefinition).AttributeValue);
+                    }
+                    // Remove AttributeValues from original SpecObject
+                    foreach (var definition in specObject.Values.Where(x => x.removed == true))
+                    {
+                        originalSpecObject.Values.Remove(originalSpecObject.Values.Single(x => x.AttributeDefinition == definition.AttributeDefinition));
+                    }
+                }
+            }
         }
 
         private void ScrollToRow(SpecObject specObject)
@@ -139,8 +212,21 @@ namespace ReqIF_Editor
         #region Events
         private void Attribute_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            (sender as AttributeValueViewModel).AttributeValue.PropertyChanged += AttributeValue_PropertyChanged;
-            (sender as AttributeValueViewModel).AttributeValue.SpecElAt.Values.Add((sender as AttributeValueViewModel).AttributeValue);
+            var test = specObjectsViewModel.SpecObjects;
+            var value = (sender as AttributeValueViewModel);
+            //if (e.PropertyName == "AttributeValue")
+            //{
+            //    if (value == null)
+            //    {
+            //        //value.PropertyChanged -= AttributeValue_PropertyChanged;
+            //        (sender as AttributeValueViewModel).AttributeValue.SpecElAt.Values.Remove((sender as AttributeValueViewModel).AttributeValue);
+            //    } else
+            //    {
+            //        value.PropertyChanged += AttributeValue_PropertyChanged;
+            //        (sender as AttributeValueViewModel).AttributeValue.SpecElAt.Values.Add((sender as AttributeValueViewModel).AttributeValue);
+            //    }
+            //}
+
         }
 
         private void AttributeValue_PropertyChanged(object sender, PropertyChangedEventArgs e)

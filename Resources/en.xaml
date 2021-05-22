@@ -30,6 +30,7 @@
     <system:String x:Key="cancel">Cancel</system:String>
     <system:String x:Key="ok">OK</system:String>
     <system:String x:Key="addAttribute">Add attribute</system:String>
+    <system:String x:Key="removeAttribute">Remove attribute</system:String>
     <system:String x:Key="selectAttribute">Select attribute</system:String>
     <system:String x:Key="attributes">Attributes</system:String>
     <system:String x:Key="values">Values</system:String>

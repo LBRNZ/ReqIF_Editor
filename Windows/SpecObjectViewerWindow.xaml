@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ReqIF_Editor"
-        xmlns:reqif="clr-namespace:ReqIFSharp;assembly=ReqIFSharp_PlusObjects"
+        xmlns:reqif="clr-namespace:ReqIFSharp;assembly=ReqIFSharp"
         xmlns:smith="clr-namespace:Smith.WPF.HtmlEditor;assembly=HtmlEditorWPF"
         xmlns:wpftool="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
@@ -13,6 +13,7 @@
     <Window.Resources>
         <local:XHTMLConverter x:Key="XHTMLConverter"/>
         <local:AttributeEditableConverter x:Key="AttributeEditableConverter"/>
+        <local:ValueToVisibilityConverter x:Key="ValueToVisibilityConverter"/>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -73,7 +74,7 @@
                                 <ContentPresenter.Resources>
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueXHTML}">
                                         <smith:HtmlEditor HorizontalAlignment="Left" 
-                                                          BindingContent="{Binding ObjectValue, Mode=TwoWay, UpdateSourceTrigger=Explicit, Converter={StaticResource XHTMLConverter}}"
+                                                          BindingContent="{Binding ObjectValue, Mode=TwoWay, Converter={StaticResource XHTMLConverter}}"
                                                           IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"
                                                           FontFamilyListVisibility="Collapsed"
                                                           FontSizeListVisibility="Collapsed" Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ActualWidth}"
@@ -95,19 +96,19 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueBoolean}">
                                         <CheckBox HorizontalAlignment="Left"
-                                                  IsChecked="{Binding ObjectValue, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                  IsChecked="{Binding ObjectValue, Mode=TwoWay}"
                                                   IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"
                                                   Name="dataField"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueDate}">
                                         <wpftool:DateTimePicker HorizontalAlignment="Left"
-                                                                Value="{Binding ObjectValue, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                                Value="{Binding ObjectValue, Mode=TwoWay}"
                                                                 IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"
                                                                 Name="dataField"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueInteger}">
                                         <wpftool:LongUpDown HorizontalAlignment="Stretch"
-                                                            Value="{Binding ObjectValue, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                            Value="{Binding ObjectValue, Mode=TwoWay}"
                                                             Maximum="{Binding Definition.DatatypeDefinition.Max}"
                                                             Minimum="{Binding Definition.DatatypeDefinition.Min}"
                                                             HorizontalContentAlignment="Left"
@@ -116,7 +117,7 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueReal}">
                                         <wpftool:DoubleUpDown HorizontalAlignment="Left"
-                                                            Value="{Binding ObjectValue, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                            Value="{Binding ObjectValue, Mode=TwoWay}"
                                                             Maximum="{Binding Definition.DatatypeDefinition.Max}"
                                                             Minimum="{Binding Definition.DatatypeDefinition.Min}"
                                                             IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"
@@ -124,7 +125,7 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueString}">
                                         <TextBox HorizontalAlignment="Stretch"
-                                                 Text="{Binding ObjectValue, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                 Text="{Binding ObjectValue, Mode=TwoWay}"
                                                  BorderBrush="{x:Null}"
                                                  IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"
                                                  Name="dataField"/>
@@ -134,7 +135,7 @@
                                                 Height="20"
                                                 Width="20"
                                                 Margin="5"
-                                                Click="AddSpecObjectButton_Click"
+                                                Click="AddAttributeButton_Click"
                                                 DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}">
                                             <StackPanel Orientation="Horizontal">
                                                 <Image Source="{StaticResource PlusIcon}" Margin="0,0,5,0" ToolTip="{DynamicResource addAttribute}"/>
@@ -146,6 +147,21 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="30" MinWidth="30" MaxWidth="30">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button x:Name="RemoveSpecObject_Button"
+                                    Height="20"
+                                    Width="20"
+                                    Click="RemoveAttributeButton_Click"
+                                    DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}"
+                                    Visibility="{Binding Path=AttributeValue, Converter={StaticResource ValueToVisibilityConverter}}">
+                                <Image Source="{StaticResource MinusIcon}" ToolTip="{DynamicResource removeAttribute}"/>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
             </DataGrid.Columns>
             <DataGrid.Resources>
 
@@ -178,7 +194,6 @@
                     Click="CancelSpecObjectButton_Click"
                     IsCancel="True"
                     DockPanel.Dock="Right"/>
-
         </DockPanel>
 
     </Grid>
