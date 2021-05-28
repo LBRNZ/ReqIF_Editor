@@ -36,7 +36,16 @@ namespace ReqIF_Editor
                 AttributeValue AttributeValue;
                 if (value.AttributeValue != null)
                 {
-                    AttributeValue = value.AttributeValue.Clone();
+
+                    if(value.AttributeValue.GetType() == typeof(AttributeValueEnumeration))
+                    {
+                        AttributeValue = new AttributeValueEnumeration();
+                        AttributeValue.AttributeDefinition = value.AttributeValue.AttributeDefinition;
+                        AttributeValue.ObjectValue = (value.AttributeValue.ObjectValue as List<EnumValue>).Clone();
+                    } else
+                    {
+                        AttributeValue = value.AttributeValue.Clone();
+                    }
                     AttributeValue.PropertyChanged += AttributeValue_PropertyChanged;
 
                 } else
@@ -94,8 +103,8 @@ namespace ReqIF_Editor
                 _attributes[dataGridRowIndex].removed = true;
                 _attributes[dataGridRowIndex].added = false;
             }
+            _attributes[dataGridRowIndex].changed = false;
 
-            
         }
 
         private void CancelSpecObjectButton_Click(object sender, RoutedEventArgs e)
@@ -149,7 +158,7 @@ namespace ReqIF_Editor
             attributeValue.SpecElAt = (Application.Current.MainWindow as MainWindow).content.SpecObjects.SingleOrDefault(x => x.Identifier == _specObject.Identifier);
             _attributes[dataGridRowIndex].AttributeValue = attributeValue;
             _attributes[dataGridRowIndex].added = true;
-
+            _attributes[dataGridRowIndex].removed = false;
         }
 
     }

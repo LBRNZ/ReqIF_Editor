@@ -174,18 +174,22 @@ namespace ReqIF_Editor
                     {
                         originalSpecObject.Values.Single(x => x.AttributeDefinition == definition.AttributeDefinition).ObjectValue
                             = specObject.Values.Single(x => x.AttributeDefinition == definition.AttributeDefinition).AttributeValue.ObjectValue;
-                    }
-                    //Add new AttributeValues to original SpecObject
-                    foreach (var definition in specObject.Values.Where(x => x.added == true))
-                    {
-                        originalSpecObject.Values.Add(specObject.Values.Single(x => x.AttributeDefinition == definition.AttributeDefinition).AttributeValue);
+                        definition.changed = false;
                     }
                     // Remove AttributeValues from original SpecObject
                     foreach (var definition in specObject.Values.Where(x => x.removed == true))
                     {
                         originalSpecObject.Values.Remove(originalSpecObject.Values.Single(x => x.AttributeDefinition == definition.AttributeDefinition));
+                        definition.removed = false;
+                    }
+                    //Add new AttributeValues to original SpecObject
+                    foreach (var definition in specObject.Values.Where(x => x.added == true))
+                    {
+                        originalSpecObject.Values.Add(specObject.Values.Single(x => x.AttributeDefinition == definition.AttributeDefinition).AttributeValue);
+                        definition.added = false;
                     }
                 }
+                isContenChanged = true;
             }
         }
 
@@ -282,15 +286,25 @@ namespace ReqIF_Editor
             if (openFileDialog.ShowDialog() == true)
             {
                 ClearDataGrid();
-                Deserialize(openFileDialog.FileName);
-                //MainDataGrid.ItemsSource = content.SpecObjects;
-                NavigationTreeView.ItemsSource = content.Specifications.First().Children;
+                try
+                {
+                    Deserialize(openFileDialog.FileName);
+                } catch(Exception exc)
+                {
+                    MessageBox.Show(exc.Message, "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
 
-                Style rowStyle = new Style(typeof(DataGridRow));
-                rowStyle.Setters.Add(new EventSetter(DataGridRow.MouseDoubleClickEvent,
-                                         new MouseButtonEventHandler(Row_DoubleClick)));
-                MainDataGrid.RowStyle = rowStyle;
-                filePath = openFileDialog.FileName;
+                if(content != null)
+                {
+                    NavigationTreeView.ItemsSource = content.Specifications.First().Children;
+
+                    Style rowStyle = new Style(typeof(DataGridRow));
+                    rowStyle.Setters.Add(new EventSetter(DataGridRow.MouseDoubleClickEvent,
+                                             new MouseButtonEventHandler(Row_DoubleClick)));
+                    MainDataGrid.RowStyle = rowStyle;
+                    filePath = openFileDialog.FileName;
+                    }
+
             }
                 
         }

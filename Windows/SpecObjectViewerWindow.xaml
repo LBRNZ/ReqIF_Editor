@@ -84,7 +84,7 @@
                                     <DataTemplate DataType="{x:Type reqif:AttributeValueEnumeration}">
                                         <ListBox HorizontalAlignment="Left"
                                                  ItemsSource="{Binding Definition.DatatypeDefinition.SpecifiedValues}"
-                                                 SelectedItem="{Binding ObjectValue[0], Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                 SelectedItem="{Binding ObjectValue[0], Mode=TwoWay}"
                                                  IsEnabled="{Binding AttributeDefinition.IsEditable, Converter={StaticResource AttributeEditableConverter}}"
                                                  Name="dataField">
                                             <ListBox.ItemTemplate>
@@ -138,8 +138,17 @@
                                                 Click="AddAttributeButton_Click"
                                                 DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}">
                                             <StackPanel Orientation="Horizontal">
-                                                <Image Source="{StaticResource PlusIcon}" Margin="0,0,5,0" ToolTip="{DynamicResource addAttribute}"/>
+                                                <Image Source="{StaticResource PlusIcon}" Margin="0,0,5,0" ToolTip="{DynamicResource addAttribute}" />
                                             </StackPanel>
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=DataContext.removed, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
+                                                            <Setter Property="IsEnabled" Value="false"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
                                         </Button>
                                     </DataTemplate>
                                 </ContentPresenter.Resources>
@@ -157,6 +166,15 @@
                                     DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}"
                                     Visibility="{Binding Path=AttributeValue, Converter={StaticResource ValueToVisibilityConverter}}">
                                 <Image Source="{StaticResource MinusIcon}" ToolTip="{DynamicResource removeAttribute}"/>
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=DataContext.added, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
+                                                <Setter Property="IsEnabled" Value="false"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
                             </Button>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

@@ -72,9 +72,6 @@
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Xaml.Behaviors.Wpf.1.1.31\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
-    <Reference Include="ReqIFSharp, Version=3.1.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\ReqIFSharp_Plus.3.1.2\lib\net45\ReqIFSharp.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -229,6 +226,12 @@
     <EmbeddedResource Include="XSLT\AddClassToDiv.xslt" />
     <Resource Include="smithhtmleditor.config.xml" />
     <Content Include="smithhtmleditor.stylesheet.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\reqifsharp_plus\ReqIFSharp\ReqIFSharp.csproj">
+      <Project>{5289fa4d-59c1-4119-9cb4-1125d408584e}</Project>
+      <Name>ReqIFSharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
