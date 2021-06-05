@@ -37,4 +37,6 @@
     <system:String x:Key="editRequirement">Anforderung bearbeiten</system:String>
     <system:String x:Key="settings1">Rechteeinschränkung in ReqIF ignorieren</system:String>
     <system:String x:Key="settings2">Beim Bearbeiten von Attributwerten wird die Einschränkung von Schreibrechten im Dokument ignoriert. Alle Attributwerte können bearbeitet werden.</system:String>
+    <system:String x:Key="specification">Spezifikation</system:String>
+    <system:String x:Key="file">Datei</system:String>
 </ResourceDictionary>

@@ -27,9 +27,18 @@ namespace ReqIF_Editor
     /// <summary>
     /// Interaktionslogik für MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : RibbonWindow
+    public partial class MainWindow : RibbonWindow, INotifyPropertyChanged
     {
-        public ReqIF reqif;
+        private IEnumerable<ReqIF> _reqif;
+        public IEnumerable<ReqIF> reqif {
+            get => this._reqif;
+            set
+            {
+                _reqif = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         public ReqIFHeader header;
         public ReqIFContent content;
         public SpecObjectsViewModel specObjectsViewModel;
@@ -53,10 +62,10 @@ namespace ReqIF_Editor
         public void Deserialize(string filepath)
         {
             ReqIFDeserializer deserializer = new ReqIFDeserializer();
-            reqif = deserializer.Deserialize(filepath).First();
-            header = reqif.TheHeader;
-            content = reqif.CoreContent;
-            embeddedObjects = reqif.EmbeddedObjects;
+            reqif = deserializer.Deserialize(filepath);
+            header = reqif.First().TheHeader;
+            content = reqif.First().CoreContent;
+            embeddedObjects = reqif.First().EmbeddedObjects;
 
             PropertyGrid.DataContext = header;
             specObjectsViewModel = new SpecObjectsViewModel(content);
@@ -75,7 +84,6 @@ namespace ReqIF_Editor
             }
             initializeColumns();
             MainDataGrid.ItemsSource = specObjectsViewModel.SpecObjects;
-
         }
 
 
@@ -276,6 +284,26 @@ namespace ReqIF_Editor
         {
             System.Diagnostics.Process.Start(e.Uri.ToString());
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        private void SpecificationsCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var test = sender;
+        }
+
+        private void FilesCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            SpecificationsCombo.SelectedIndex = 0;
+        }
         #endregion
 
         #region Callbacks
@@ -463,6 +491,8 @@ namespace ReqIF_Editor
             }
             Application.Current.Resources.MergedDictionaries.Add(dict);
         }
+
+
     }
 
     class Html : TinyHtml.Wpf.WpfHtmlControl

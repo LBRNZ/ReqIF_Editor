@@ -37,4 +37,6 @@
     <system:String x:Key="editRequirement">Edit requirement</system:String>
     <system:String x:Key="settings1">Ignore rights restriction in ReqIF</system:String>
     <system:String x:Key="settings2">When editing attribute values, the restriction of write permissions in the document is ignored. All attribute values can be edited.</system:String>
+    <system:String x:Key="specification">Specification</system:String>
+    <system:String x:Key="file">File</system:String>
 </ResourceDictionary>

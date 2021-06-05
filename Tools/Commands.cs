@@ -123,10 +123,10 @@ namespace ReqIF_Editor.Commands
 			string extension = Path.GetExtension((sender as MainWindow).filePath);
 			if(extension == ".reqif")
             {
-				serializer.Serialize((sender as MainWindow).reqif, (sender as MainWindow).filePath, null);
+				serializer.Serialize((sender as MainWindow).reqif.First(), (sender as MainWindow).filePath, null);
 			} else if(extension == ".reqifz")
             {
-				string reqif = serializer.Serialize((sender as MainWindow).reqif);
+				string reqif = serializer.Serialize((sender as MainWindow).reqif.First());
 				using (var archive = ZipFile.Open((sender as MainWindow).filePath, ZipArchiveMode.Update))
 				{
 					var entry = archive.Entries.Where(x => x.Name.EndsWith(".reqif", StringComparison.CurrentCultureIgnoreCase)).First();

@@ -37,4 +37,6 @@
     <system:String x:Key="editRequirement">solicitud de edición</system:String>
     <system:String x:Key="settings1">ignorar la restricción de permisos en ReqIF</system:String>
     <system:String x:Key="settings2">Cuando se editan valores de atributos, se ignora la restricción de permiso de escritura en el documento. Todos los valores de los atributos pueden ser editados.</system:String>
+    <system:String x:Key="specification">Especificación</system:String>
+    <system:String x:Key="file">Archivo</system:String>
 </ResourceDictionary>

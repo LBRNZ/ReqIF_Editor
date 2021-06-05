@@ -8,7 +8,7 @@
         xmlns:c="clr-namespace:ReqIF_Editor.Commands"
         xmlns:properties="clr-namespace:ReqIF_Editor.Properties"
         mc:Ignorable="d"
-        Title="ReqIF Editor" Height="768" Width="1024" WindowState="Maximized">
+        Title="ReqIF Editor" Height="768" Width="1024" WindowState="Maximized" x:Name="_this">
     <Window.Resources>
         <local:HierarchyObjectValueConverter x:Key="HierarchyObjectValueConverter"/>
         <local:SpecificationChildrenValueConverter x:Key="SpecificationChildrenValueConverter"/>
@@ -166,6 +166,23 @@
                                    Icon="{StaticResource AddUnderIcon}"
                                    LargeIcon="{StaticResource AddUnderIcon}"
                                    Command="c:MainWindowCommand.AddSpecObjectUnder" />
+                    <Fluent:ComboBox Header="{DynamicResource file}" Name="FilesCombo" IsEditable="False"
+                                     SelectedIndex="0" ItemsSource="{Binding Path=reqif}" DataContext="{Binding ElementName=_this}" SelectionChanged="FilesCombo_SelectionChanged">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=TheHeader.Title}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </Fluent:ComboBox>
+                    <Fluent:ComboBox Header="{DynamicResource specification}" Name="SpecificationsCombo" IsEditable="False"
+                                     ItemsSource="{Binding Path=SelectedItem.CoreContent.Specifications, ElementName=FilesCombo}"
+                                     Text="{Binding LongName}" SelectedIndex="0" SelectionChanged="SpecificationsCombo_SelectionChanged">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding LongName}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </Fluent:ComboBox>
                 </Fluent:RibbonGroupBox>
             </Fluent:RibbonTabItem>
         </Fluent:Ribbon>
