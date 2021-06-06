@@ -1,4 +1,5 @@
-﻿using ReqIFSharp;
+﻿using ReqIF_Editor.TreeDataGrid;
+using ReqIFSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -62,7 +63,7 @@ namespace ReqIF_Editor.Commands
 
 		public static void EditSpecObject_Executed(object sender, ExecutedRoutedEventArgs e)
 		{
-			(sender as MainWindow).Edit_SpecObject((sender as MainWindow).MainDataGrid.SelectedItem as SpecobjectViewModel, false);
+			(sender as MainWindow).Edit_SpecObject(((sender as MainWindow).MainDataGrid.SelectedItem as RowDef).Cells, false);
 
 		}
 

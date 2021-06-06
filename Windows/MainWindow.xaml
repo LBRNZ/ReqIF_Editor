@@ -5,14 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:Fluent="urn:fluent-ribbon"
         xmlns:local="clr-namespace:ReqIF_Editor"
+        xmlns:tdg="clr-namespace:ReqIF_Editor.TreeDataGrid"
         xmlns:c="clr-namespace:ReqIF_Editor.Commands"
         xmlns:properties="clr-namespace:ReqIF_Editor.Properties"
         mc:Ignorable="d"
         Title="ReqIF Editor" Height="768" Width="1024" WindowState="Maximized" x:Name="_this">
     <Window.Resources>
+        
         <local:HierarchyObjectValueConverter x:Key="HierarchyObjectValueConverter"/>
         <local:SpecificationChildrenValueConverter x:Key="SpecificationChildrenValueConverter"/>
         <local:SearchResultObjectValueConverter x:Key="SearchResultObjectValueConverter"/>
+        <tdg:LevelToMarginConverter x:Key="ConvertToThickness" LeftMargin="12" OtherMargin="4" />
         <HierarchicalDataTemplate x:Key="ChildrenTemplate" 
                               ItemsSource="{Binding Path=Children, Converter={StaticResource SpecificationChildrenValueConverter}}">
             <TextBlock Text="{Binding Path=Object, Converter={StaticResource HierarchyObjectValueConverter}}" Foreground="#FF3C3C3C" Padding="0,2,0,2"/>
@@ -20,12 +23,86 @@
         <Style x:Key="PropertyNameStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14" />
         </Style>
-        <DataTemplate x:Key="TextTemplate">
-            <TextBox HorizontalAlignment="Stretch"
-                Text="TEST XXX"
-                BorderBrush="{x:Null}"
-                Name="dataField"/>
-        </DataTemplate>
+      
+
+        <Style x:Key="TreeExpanderStyle" TargetType="CheckBox">
+            <Setter Property="Background" Value="#FF448DCA" />
+            <Setter Property="Foreground" Value="#FF000000" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="VerticalContentAlignment" Value="Top" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid HorizontalAlignment="Left">
+                            <Path
+                                x:Name="IsCollapsedIcon"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Data="M2,2 L14,7 L2,14 z"
+                                Fill="{TemplateBinding BorderBrush}"
+                                UseLayoutRounding="False"
+                                Visibility="Collapsed" />
+                            <Path
+                                x:Name="IsExpandedIcon"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Data="M2,2 L14,2 L7,14 z"
+                                Fill="{TemplateBinding BorderBrush}"
+                                UseLayoutRounding="False"
+                                Visibility="Collapsed" />
+                            <Rectangle
+                                x:Name="IndeterminateIcon"
+                                Width="16"
+                                Height="16"
+                                Fill="#FF333333"
+                                Opacity="0" />
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CheckStates">
+                                    <VisualState x:Name="Checked">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames
+                                                BeginTime="00:00:00"
+                                                Storyboard.TargetName="IsExpandedIcon"
+                                                Storyboard.TargetProperty="(UIElement.Visibility)"
+                                                Duration="00:00:00.0010000">
+                                                <DiscreteObjectKeyFrame KeyTime="00:00:00">
+                                                    <DiscreteObjectKeyFrame.Value>
+                                                        <Visibility>Visible</Visibility>
+                                                    </DiscreteObjectKeyFrame.Value>
+                                                </DiscreteObjectKeyFrame>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Unchecked">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames
+                                                BeginTime="00:00:00"
+                                                Storyboard.TargetName="IsCollapsedIcon"
+                                                Storyboard.TargetProperty="(UIElement.Visibility)"
+                                                Duration="00:00:00.0010000">
+                                                <DiscreteObjectKeyFrame KeyTime="00:00:00">
+                                                    <DiscreteObjectKeyFrame.Value>
+                                                        <Visibility>Visible</Visibility>
+                                                    </DiscreteObjectKeyFrame.Value>
+                                                </DiscreteObjectKeyFrame>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Indeterminate">
+                                        <!--<Storyboard>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IndeterminateIcon" Storyboard.TargetProperty="(UIElement.Opacity)">
+                                                <SplineDoubleKeyFrame KeyTime="0" Value="1"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                        </Storyboard>-->
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -167,7 +244,7 @@
                                    LargeIcon="{StaticResource AddUnderIcon}"
                                    Command="c:MainWindowCommand.AddSpecObjectUnder" />
                     <Fluent:ComboBox Header="{DynamicResource file}" Name="FilesCombo" IsEditable="False"
-                                     SelectedIndex="0" ItemsSource="{Binding Path=reqif}" DataContext="{Binding ElementName=_this}" SelectionChanged="FilesCombo_SelectionChanged">
+                                     SelectedIndex="0" ItemsSource="{Binding Path=reqif, ElementName=_this}" SelectionChanged="FilesCombo_SelectionChanged">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Path=TheHeader.Title}"/>
@@ -291,22 +368,17 @@
                       AutoGenerateColumns="False"
                       SelectionMode="Single"
                       CanUserAddRows="false"
-                      >
-                <!--<DataGrid.RowDetailsTemplate>
-                    <DataTemplate>
-                        <DataGrid ItemsSource="{Binding SelectedItem,ElementName=MainDataGrid}" x:Name="DataGridDetail" AutoGenerateColumns="False">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Binding="{Binding TheValue}"></DataGridTextColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </DataTemplate>
-                </DataGrid.RowDetailsTemplate>-->
+                      DataContext="{Binding ElementName=_this, Path=Source}"
+                      ItemsSource="{Binding Path=Display, Mode=OneWay}">
                 <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" 
                         Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}"/>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
                     <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" 
                         Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}"/>
+                    <Style TargetType="DataGridRow">
+                        <EventSetter Event="MouseDoubleClick" Handler="Row_DoubleClick"/>
+                    </Style>
                 </DataGrid.Resources>
             </DataGrid>
         </Grid>

@@ -109,6 +109,9 @@
     <Compile Include="Settings.cs" />
     <Compile Include="Tools\Extensions.cs" />
     <Compile Include="Tools\SpecObjectsViewModel.cs" />
+    <Compile Include="TreeDataGrid\GridDef.cs" />
+    <Compile Include="TreeDataGrid\LevelToMarginConverter.cs" />
+    <Compile Include="TreeDataGrid\RowDef.cs" />
     <Compile Include="Windows\SpecObjectViewerWindow.xaml.cs">
       <DependentUpon>SpecObjectViewerWindow.xaml</DependentUpon>
     </Compile>

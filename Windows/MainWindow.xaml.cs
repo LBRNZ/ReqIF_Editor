@@ -18,9 +18,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Navigation;
-using System.Windows.Markup;
-using System.Xml;
-using System.Windows.Media;
+using ReqIF_Editor.TreeDataGrid;
 
 namespace ReqIF_Editor
 {
@@ -39,6 +37,17 @@ namespace ReqIF_Editor
             }
         }
 
+        private GridDef _Source;
+        public GridDef Source
+        {
+            get => this._Source;
+            set
+            {
+                _Source = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         public ReqIFHeader header;
         public ReqIFContent content;
         public SpecObjectsViewModel specObjectsViewModel;
@@ -53,7 +62,6 @@ namespace ReqIF_Editor
             SetLanguageDictionary();
             Loaded += new RoutedEventHandler(MainWindow_Loaded);
             Sidepanel.PropertyChanged += SidePanel_PropertyChanged;
-
             Sidepanel.Expanded = false;
             NavigationButton.DataContext = Sidepanel;
         }
@@ -82,8 +90,8 @@ namespace ReqIF_Editor
                         attribute.AttributeValue.PropertyChanged += AttributeValue_PropertyChanged;
                 }
             }
-            initializeColumns();
-            MainDataGrid.ItemsSource = specObjectsViewModel.SpecObjects;
+            //initializeColumns();
+            //MainDataGrid.ItemsSource = specObjectsViewModel.SpecObjects;
         }
 
 
@@ -93,7 +101,7 @@ namespace ReqIF_Editor
             content = null;
             header = null;
             embeddedObjects = null;
-            MainDataGrid.ItemsSource = null;
+            //MainDataGrid.ItemsSource = null;
             MainDataGrid.Columns.Clear();
             MainDataGrid.Items.Refresh();
         }
@@ -276,8 +284,8 @@ namespace ReqIF_Editor
 
         private void Row_DoubleClick(object sender, MouseButtonEventArgs e)
         {
-            Edit_SpecObject((sender as DataGridRow).DataContext as SpecobjectViewModel, false, "");
-
+            Edit_SpecObject(((sender as DataGridRow).DataContext as RowDef).Cells, false, "");
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Display"));
         }
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
@@ -297,7 +305,15 @@ namespace ReqIF_Editor
 
         private void SpecificationsCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var test = sender;
+            if(e.AddedItems.Count > 0)
+            {
+                MainDataGrid.Columns.Clear();
+                Source = new TreeDataGrid.GridDef(e.AddedItems[0] as Specification);
+
+                initializeColumns();
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Display"));
+            }
+
         }
 
         private void FilesCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -372,7 +388,7 @@ namespace ReqIF_Editor
 
         private void initializeColumns()
         {
-            var specObjectType = content.SpecTypes.FirstOrDefault(x => x.GetType() == typeof(SpecObjectType));
+            var specObjectType = (FilesCombo.SelectedItem as ReqIF).CoreContent.SpecTypes.FirstOrDefault(x => x.GetType() == typeof(SpecObjectType));
             int chapterIndex = specObjectType?.SpecAttributes.FindIndex(x => x.LongName == "ReqIF.ChapterName") ?? -1;
             int textIndex = specObjectType?.SpecAttributes.FindIndex(x => x.LongName == "ReqIF.Text") ?? -1;
 
@@ -386,7 +402,7 @@ namespace ReqIF_Editor
                 col.Width = 500;
                 MainDataGrid.Columns.Add(col);
             }
-            foreach (var dataType in content.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault().SpecAttributes) {
+            foreach (var dataType in (FilesCombo.SelectedItem as ReqIF).CoreContent.SpecTypes.Where(x => x.GetType() == typeof(SpecObjectType)).FirstOrDefault().SpecAttributes) {
                 FrameworkElementFactory factory = null;
                 DependencyProperty dp = null;
                 if (chapterIndex == i || textIndex == i)
@@ -446,7 +462,7 @@ namespace ReqIF_Editor
                     dp = TextBlock.TextProperty;
                 }
                 factory.SetValue(IsEnabledProperty, false);
-                var binding = new Binding("Values[" + i++ + "].AttributeValue.ObjectValue");
+                var binding = new Binding("Cells.Values[" + i++ + "].AttributeValue.ObjectValue");
                 binding.Mode = BindingMode.OneWay;
                 if (typeOfDataType == typeof(DatatypeDefinitionXHTML))
                 {
@@ -539,9 +555,9 @@ namespace ReqIF_Editor
             DataGridCell cell = presenter.Parent as DataGridCell;
             Binding binding;
 
-            if ((cell.DataContext as SpecobjectViewModel).Values.SingleOrDefault(x => x?.AttributeDefinition.LongName == "ReqIF.ChapterName").AttributeValue != null)
+            if ((cell.DataContext as RowDef).Cells.Values.SingleOrDefault(x => x?.AttributeDefinition.LongName == "ReqIF.ChapterName").AttributeValue != null)
             {
-                binding = new Binding("Values[" + _chapterIndex + "].AttributeValue.ObjectValue")
+                binding = new Binding("Cells.Values[" + _chapterIndex + "].AttributeValue.ObjectValue")
                 {
                     Mode = BindingMode.OneWay,
                     NotifyOnSourceUpdated = true,
@@ -550,7 +566,7 @@ namespace ReqIF_Editor
                     ConverterParameter = "heading"
                 };
             } else {
-                binding = new Binding("Values[" + _textIndex + "].AttributeValue.ObjectValue")
+                binding = new Binding("Cells.Values[" + _textIndex + "].AttributeValue.ObjectValue")
                 {
                     Mode = BindingMode.OneWay,
                     NotifyOnSourceUpdated = true,
@@ -561,10 +577,26 @@ namespace ReqIF_Editor
             }
             var factory = new FrameworkElementFactory(typeof(Html));
             factory.SetBinding(Html.HtmlProperty, binding);
+            
+            //Navigation
+            FrameworkElementFactory checkFactory = new FrameworkElementFactory(typeof(System.Windows.Controls.CheckBox));
+            checkFactory.SetBinding(System.Windows.Controls.CheckBox.MarginProperty, new Binding("Level") { Converter = new LevelToMarginConverter() });
+            checkFactory.SetBinding(System.Windows.Controls.CheckBox.IsCheckedProperty, new Binding("IsExpanded") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
+            checkFactory.SetValue(System.Windows.Controls.CheckBox.StyleProperty, Application.Current.MainWindow.Resources["TreeExpanderStyle"] as Style);
+            DataGridTemplateColumn navTemplateColumn = new DataGridTemplateColumn()
+            {
+                Header = "",
+                CellTemplate = new DataTemplate() { VisualTree = checkFactory }
+            };
+            //Stackpanel
+            FrameworkElementFactory stackFactory = new FrameworkElementFactory(typeof(StackPanel));
+            stackFactory.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
+            stackFactory.AppendChild(checkFactory);
+            stackFactory.AppendChild(factory);
 
             DataTemplate cellTemplate = new DataTemplate()
             {
-                VisualTree = factory
+                VisualTree = stackFactory
             };
             return cellTemplate;
 
