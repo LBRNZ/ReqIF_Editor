@@ -9,7 +9,7 @@ using ReqIFSharp;
 
 namespace ReqIF_Editor.TreeDataGrid
 {
-    public class GridDef : INotifyPropertyChanged
+    public class GridDef
     {
         public GridDef(Specification specification)
         {
@@ -36,19 +36,24 @@ namespace ReqIF_Editor.TreeDataGrid
         private void RowDef_RowExpanding(object sender, RowDef row)
         {
             foreach (RowDef child in row.Children)
-                child.IsVisible = true;
-            OnPropertyChanged(nameof(Display));
+            {
+
+                if (row.IsExpanded.HasValue && row.IsExpanded.Value)
+                {
+                    child.IsVisible = true;
+                    RowDef_RowExpanding(this, child);
+                }
+            }
         }
 
         private void RowDef_RowCollapsing(object sender, RowDef row)
         {
             foreach (RowDef child in row.Children)
             {
-                if (row.IsExpanded.HasValue && row.IsExpanded.Value)
-                    RowDef_RowCollapsing(this, child);
                 child.IsVisible = false;
+                RowDef_RowCollapsing(this, child);
+
             }
-            OnPropertyChanged(nameof(Display));
         }
 
         private int LoadData(IList<RowDef> srce, List<SpecHierarchy> specification, RowDef parent)
@@ -115,16 +120,5 @@ namespace ReqIF_Editor.TreeDataGrid
                 }
             }
         }
-
-        protected virtual void OnPropertyChanged(string prop)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
-        }
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        #endregion INotifyPropertyChanged Members
     }
 }

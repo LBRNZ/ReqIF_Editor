@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ReqIF_Editor.TreeDataGrid
 {
-    public class RowDef
+    public class RowDef : INotifyPropertyChanged
     {
         public event EventHandler<RowDef> RowExpanding;
         public event EventHandler<RowDef> RowCollapsing;
@@ -63,6 +65,21 @@ namespace ReqIF_Editor.TreeDataGrid
         }
 
         public int Level { get; set; }
-        public bool IsVisible { get; set; }
+        private bool _IsVisible;
+        public bool IsVisible
+        {
+            get => this._IsVisible;
+            set
+            {
+                _IsVisible = value;
+                NotifyPropertyChanged();
+            }
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

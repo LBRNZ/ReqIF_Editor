@@ -282,10 +282,9 @@ namespace ReqIF_Editor
 
         }
 
-        private void Row_DoubleClick(object sender, MouseButtonEventArgs e)
+        public void Row_DoubleClick(object sender, MouseButtonEventArgs e)
         {
             Edit_SpecObject(((sender as DataGridRow).DataContext as RowDef).Cells, false, "");
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Display"));
         }
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
@@ -342,10 +341,10 @@ namespace ReqIF_Editor
                 {
                     NavigationTreeView.ItemsSource = content.Specifications.First().Children;
 
-                    Style rowStyle = new Style(typeof(DataGridRow));
-                    rowStyle.Setters.Add(new EventSetter(DataGridRow.MouseDoubleClickEvent,
-                                             new MouseButtonEventHandler(Row_DoubleClick)));
-                    MainDataGrid.RowStyle = rowStyle;
+                    //Style rowStyle = new Style(typeof(DataGridRow));
+                    //rowStyle.Setters.Add(new EventSetter(DataGridRow.MouseDoubleClickEvent,
+                    //                         new MouseButtonEventHandler(Row_DoubleClick)));
+                    //MainDataGrid.RowStyle = rowStyle;
                     filePath = openFileDialog.FileName;
                     }
 
