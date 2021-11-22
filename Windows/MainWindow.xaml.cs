@@ -48,10 +48,7 @@ namespace ReqIF_Editor
             }
         }
 
-        public ReqIFHeader header;
-        public ReqIFContent content;
         public SpecObjectsViewModel specObjectsViewModel;
-        public List<EmbeddedObject> embeddedObjects;
         public SidePanel Sidepanel = new SidePanel();
         public bool isContenChanged = false;
         public string filePath;
@@ -71,37 +68,14 @@ namespace ReqIF_Editor
         {
             ReqIFDeserializer deserializer = new ReqIFDeserializer();
             reqif = deserializer.Deserialize(filepath);
-            header = reqif.First().TheHeader;
-            content = reqif.First().CoreContent;
-            embeddedObjects = reqif.First().EmbeddedObjects;
-
-            PropertyGrid.DataContext = header;
-            specObjectsViewModel = new SpecObjectsViewModel(content);
-            specObjectsViewModel.SpecObjects.CollectionChanged += SpecObjects_CollectionChanged;
-            foreach (var specObject in specObjectsViewModel.SpecObjects)
-            {
-                foreach (var attribute in specObject.Values)
-                {
-                    attribute.PropertyChanged += Attribute_PropertyChanged;
-                }
-                foreach (var attribute in specObject.Values)
-                {
-                    if(attribute.AttributeValue != null)
-                        attribute.AttributeValue.PropertyChanged += AttributeValue_PropertyChanged;
-                }
-            }
-            //initializeColumns();
-            //MainDataGrid.ItemsSource = specObjectsViewModel.SpecObjects;
         }
 
 
 
         public void ClearDataGrid()
         {
-            content = null;
-            header = null;
-            embeddedObjects = null;
-            //MainDataGrid.ItemsSource = null;
+            reqif = null;
+            Source = null;
             MainDataGrid.Columns.Clear();
             MainDataGrid.Items.Refresh();
         }
@@ -114,7 +88,7 @@ namespace ReqIF_Editor
                 Identifier = Guid.NewGuid().ToString(),
                 LastChange = DateTime.Now
             };
-            foreach (AttributeDefinition attributeDefinition in content.SpecTypes.First().SpecAttributes)
+            foreach (AttributeDefinition attributeDefinition in (FilesCombo.SelectedItem as ReqIF).CoreContent.SpecTypes.First(x => x.GetType() == typeof(SpecObjectType)).SpecAttributes)
             {
                 specObject.Values.Add(new AttributeValueViewModel()
                 {
@@ -135,8 +109,8 @@ namespace ReqIF_Editor
                 {
                     int currentIndex = 0;
                     SpecobjectViewModel currentModelObject = (Application.Current.MainWindow as MainWindow).MainDataGrid.SelectedItem as SpecobjectViewModel;
-                    SpecObject currentObject = (Application.Current.MainWindow as MainWindow).content.SpecObjects.Single(x => x.Identifier == currentModelObject.Identifier);
-                    var specifications = (Application.Current.MainWindow as MainWindow).content.Specifications;
+                    SpecObject currentObject = (FilesCombo.SelectedItem as ReqIF).CoreContent.SpecObjects.Single(x => x.Identifier == currentModelObject.Identifier);
+                    var specifications = SpecificationsCombo.SelectedItem as Specification;
 
                     //Create new SpecObject and add Attributes
                     SpecObject newSpecObject = new SpecObject()
@@ -154,7 +128,7 @@ namespace ReqIF_Editor
                     }
 
                     //Add SpecObject to SpecHierarchy and to SpecObjects
-                    SpecHierarchy specHierarchy = specifications.First().Children.First().Descendants()
+                    SpecHierarchy specHierarchy = (SpecificationsCombo.SelectedItem as Specification).Children.First().Descendants()
                     .Where(node => node.Object == currentObject).First();
                     if (position == "after")
                     {
@@ -167,7 +141,7 @@ namespace ReqIF_Editor
                             LastChange = DateTime.Now
                         });
                         var previousObject = specHierarchy.Descendants().Last().Object;
-                        currentIndex = (Application.Current.MainWindow as MainWindow).content.SpecObjects.IndexOf(previousObject);
+                        currentIndex = (FilesCombo.SelectedItem as ReqIF).CoreContent.SpecObjects.IndexOf(previousObject);
                     }
                     else if (position == "under")
                     {
@@ -181,10 +155,10 @@ namespace ReqIF_Editor
 
                     }
                     this.specObjectsViewModel.SpecObjects.Insert(currentIndex + 1, specObject);
-                    this.content.SpecObjects.Insert(currentIndex + 1, newSpecObject);
+                    (FilesCombo.SelectedItem as ReqIF).CoreContent.SpecObjects.Insert(currentIndex + 1, newSpecObject);
                 } else
                 {
-                    var originalSpecObject = content.SpecObjects.Single(x => x.Identifier == specObject.Identifier);
+                    var originalSpecObject = (FilesCombo.SelectedItem as ReqIF).CoreContent.SpecObjects.Single(x => x.Identifier == specObject.Identifier);
                     //Update changed AttributeValues
                     foreach (var definition in specObject.Values.Where(x => x.changed == true))
                     {
@@ -221,7 +195,7 @@ namespace ReqIF_Editor
             string searchPhrase = SearchInputBox.Text;
             if (searchPhrase != "")
             {
-                List<List<AttributeValue>> listOfValues = content.SpecObjects.Select(x => x.Values).ToList();
+                List<List<AttributeValue>> listOfValues = (FilesCombo.SelectedItem as ReqIF).CoreContent.SpecObjects.Select(x => x.Values).ToList();
                 var searchResults = listOfValues.SelectMany(x => x).ToList().Where(s => s.ObjectValue.ToString().Contains(searchPhrase));
                 SearchResultsLV.ItemsSource = searchResults;
                 NavigationTabControl.SelectedIndex = 1;
@@ -336,17 +310,12 @@ namespace ReqIF_Editor
                 {
                     MessageBox.Show(exc.Message, "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-
-                if(content != null)
+                FilesCombo.SelectedIndex = 0;
+                if ((FilesCombo.SelectedItem as ReqIF)?.CoreContent != null)
                 {
-                    NavigationTreeView.ItemsSource = content.Specifications.First().Children;
-
-                    //Style rowStyle = new Style(typeof(DataGridRow));
-                    //rowStyle.Setters.Add(new EventSetter(DataGridRow.MouseDoubleClickEvent,
-                    //                         new MouseButtonEventHandler(Row_DoubleClick)));
-                    //MainDataGrid.RowStyle = rowStyle;
+                    NavigationTreeView.ItemsSource = (FilesCombo.SelectedItem as ReqIF).CoreContent.Specifications.First().Children;
                     filePath = openFileDialog.FileName;
-                    }
+                }
 
             }
                 
@@ -524,16 +493,19 @@ namespace ReqIF_Editor
         }
         protected override Stream OnLoadResource(string url)
         {
-            MemoryStream memoryStream = new MemoryStream();
-            var embeddedObject = ((MainWindow)System.Windows.Application.Current.MainWindow).embeddedObjects.Find(x => x.Name == url);
-            if(embeddedObject != null)
+            using (MemoryStream memoryStream = new MemoryStream())
             {
-                embeddedObject.ObjectValue.Position = 0;
-                return embeddedObject.ObjectValue;
-            } else
-            {
-                Properties.Resources.Document_notFound.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
-                return memoryStream;
+                var embeddedObject = (((MainWindow)Application.Current.MainWindow).FilesCombo.SelectedItem as ReqIF).EmbeddedObjects.Find(x => x.Name == url);
+                if (embeddedObject != null)
+                {
+                    embeddedObject.ObjectValue.Position = 0;
+                    return embeddedObject.ObjectValue;
+                }
+                else
+                {
+                    Properties.Resources.Document_notFound.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
+                    return memoryStream;
+                }
             }
         }
     }

@@ -155,7 +155,7 @@ namespace ReqIF_Editor
                 attributeValue.ObjectValue = "<div></div>";
             }
             attributeValue.AttributeDefinition = selectedAttribute;
-            attributeValue.SpecElAt = (Application.Current.MainWindow as MainWindow).content.SpecObjects.SingleOrDefault(x => x.Identifier == _specObject.Identifier);
+            attributeValue.SpecElAt = ((Application.Current.MainWindow as MainWindow).FilesCombo.SelectedItem as ReqIF).CoreContent.SpecObjects.SingleOrDefault(x => x.Identifier == _specObject.Identifier);
             _attributes[dataGridRowIndex].AttributeValue = attributeValue;
             _attributes[dataGridRowIndex].added = true;
             _attributes[dataGridRowIndex].removed = false;

@@ -16,7 +16,7 @@ namespace ReqIF_Editor.Commands
 	{
 		public static void ShowSearch_CanExecute(object sender, CanExecuteRoutedEventArgs e)
 		{
-			if((sender as MainWindow).content != null)
+			if(((sender as MainWindow).FilesCombo.SelectedItem as ReqIF)?.CoreContent != null)
 			{
 				e.CanExecute = true;
 			} else
@@ -33,7 +33,7 @@ namespace ReqIF_Editor.Commands
 		}
 		public static void ShowNavigation_CanExecute(object sender, CanExecuteRoutedEventArgs e)
 		{
-			if ((sender as MainWindow).content != null)
+			if (((sender as MainWindow).FilesCombo.SelectedItem as ReqIF)?.CoreContent != null)
 			{
 				e.CanExecute = true;
 			}
@@ -108,7 +108,7 @@ namespace ReqIF_Editor.Commands
 		}
 		public static void CloseFile_CanExecute(object sender, CanExecuteRoutedEventArgs e)
 		{
-			if ((sender as MainWindow).content != null)
+			if (((sender as MainWindow).FilesCombo.SelectedItem as ReqIF)?.CoreContent != null)
 			{
 				e.CanExecute = true;
 			}

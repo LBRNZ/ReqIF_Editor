@@ -129,7 +129,7 @@
                         <Fluent:BackstageTabItem Header="{DynamicResource properties}">
                             <WrapPanel Orientation="Vertical" Margin="30">
                                 <TextBlock Text="{DynamicResource properties}" FontSize="34"/>
-                                <Grid Width="800" Name="PropertyGrid" Margin="0,20,0,10">
+                                <Grid Width="800" Name="PropertyGrid" Margin="0,20,0,10" DataContext="{Binding ElementName=FilesCombo, Path=SelectedItem}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="120" />
                                         <ColumnDefinition Width="*" />
@@ -153,15 +153,15 @@
                                     <TextBlock Grid.Column="0" Grid.Row="5" Text="{DynamicResource reqifVersion}" Style="{StaticResource PropertyNameStyle}"/>
                                     <TextBlock Grid.Column="0" Grid.Row="6" Text="{DynamicResource sourcetoolId}" Style="{StaticResource PropertyNameStyle}"/>
                                     <TextBlock Grid.Column="0" Grid.Row="7" Text="{DynamicResource title}" Style="{StaticResource PropertyNameStyle}"/>
-                                    
-                                    <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding Comment}"/>
-                                    <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding CreationTime}"/>
-                                    <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding Identifier}"/>
-                                    <TextBlock Grid.Column="1" Grid.Row="3" Text="{Binding RepositoryId}"/>
-                                    <TextBlock Grid.Column="1" Grid.Row="4" Text="{Binding ReqIFToolId}"/>
-                                    <TextBlock Grid.Column="1" Grid.Row="5" Text="{Binding ReqIFVersion}"/>
-                                    <TextBlock Grid.Column="1" Grid.Row="6" Text="{Binding SourceToolId}"/>
-                                    <TextBlock Grid.Column="1" Grid.Row="7" Text="{Binding Title}"/>
+
+                                    <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding TheHeader.Comment}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding TheHeader.CreationTime}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding TheHeader.Identifier}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="3" Text="{Binding TheHeader.RepositoryId}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="4" Text="{Binding TheHeader.ReqIFToolId}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="5" Text="{Binding TheHeader.ReqIFVersion}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="6" Text="{Binding TheHeader.SourceToolId}"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="7" Text="{Binding TheHeader.Title}"/>
                                 </Grid>
 
                             </WrapPanel>
@@ -244,7 +244,7 @@
                                    LargeIcon="{StaticResource AddUnderIcon}"
                                    Command="c:MainWindowCommand.AddSpecObjectUnder" />
                     <Fluent:ComboBox Header="{DynamicResource file}" Name="FilesCombo" IsEditable="False"
-                                     SelectedIndex="0" ItemsSource="{Binding Path=reqif, ElementName=_this}" SelectionChanged="FilesCombo_SelectionChanged">
+                                     ItemsSource="{Binding Path=reqif, ElementName=_this}" SelectionChanged="FilesCombo_SelectionChanged">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Path=TheHeader.Title}"/>
