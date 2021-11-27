@@ -185,9 +185,13 @@ namespace ReqIF_Editor
 
         private void ScrollToRow(SpecObject specObject)
         {
-            RowDef target = Source.Display.First(x => x.Cells.Identifier == specObject.Identifier);
-            MainDataGrid.SelectedItem = target;
-            MainDataGrid.ScrollIntoView(target);
+            RowDef target = Source.Display.FirstOrDefault(x => x.Cells.Identifier == specObject.Identifier);
+            if (target != null)
+            {
+                MainDataGrid.SelectedItem = target;
+                MainDataGrid.ScrollIntoView(target);
+            }
+
         }
 
         private void SearchDocument()
