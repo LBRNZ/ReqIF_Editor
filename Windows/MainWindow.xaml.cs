@@ -185,9 +185,9 @@ namespace ReqIF_Editor
 
         private void ScrollToRow(SpecObject specObject)
         {
-            specObject = specObjectsViewModel.SpecObjects.Single(x => x.Identifier == specObject.Identifier);
-            MainDataGrid.SelectedItem = specObject;
-            MainDataGrid.ScrollIntoView(specObject);
+            RowDef target = Source.Display.First(x => x.Cells.Identifier == specObject.Identifier);
+            MainDataGrid.SelectedItem = target;
+            MainDataGrid.ScrollIntoView(target);
         }
 
         private void SearchDocument()
@@ -285,6 +285,8 @@ namespace ReqIF_Editor
 
                 initializeColumns();
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Display"));
+                //Set Source of Navigation
+                NavigationTreeView.ItemsSource = (e.AddedItems[0] as Specification).Children;
             }
 
         }
@@ -313,7 +315,7 @@ namespace ReqIF_Editor
                 FilesCombo.SelectedIndex = 0;
                 if ((FilesCombo.SelectedItem as ReqIF)?.CoreContent != null)
                 {
-                    NavigationTreeView.ItemsSource = (FilesCombo.SelectedItem as ReqIF).CoreContent.Specifications.First().Children;
+
                     filePath = openFileDialog.FileName;
                 }
 
