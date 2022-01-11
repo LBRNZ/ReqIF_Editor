@@ -17,7 +17,11 @@ namespace ReqIF_Editor.TreeDataGrid
             if (specification.Children.Any())
             {
                 LoadData(Source, specification.Children, null);
-                Source[0].IsVisible = true;
+                if (Source.Any())
+                {
+                    Source[0].IsVisible = true;
+                }
+
             }
 
         }
@@ -29,7 +33,11 @@ namespace ReqIF_Editor.TreeDataGrid
             get
             {
                 //TODO: How to do this with multiple roots?
-                return new ObservableCollection<RowDef>(IterateTree(Source[0]));
+                if (Source.Any())
+                {
+                    return new ObservableCollection<RowDef>(IterateTree(Source[0]));
+                }
+                return null;
             }
         }
 
@@ -62,33 +70,37 @@ namespace ReqIF_Editor.TreeDataGrid
             foreach (SpecHierarchy sh in specification)
             {
                 SpecObject specObject = sh.Object;
-                SpecobjectViewModel specobjectViewModel = new SpecobjectViewModel()
+                if (specObject != null)
                 {
-                    Identifier = specObject.Identifier,
-                    AlternativeId = specObject.AlternativeId,
-                    Description = specObject.Description,
-                    LastChange = specObject.LastChange,
-                    LongName = specObject.LongName,
-                    Type = specObject.Type,
-                    SpecType = specObject.SpecType
-                };
-                foreach (AttributeDefinition attributeDefinition in specObject.SpecType.SpecAttributes)
-                {
-                    AttributeValue attributeValue = specObject.Values.Where(x => x.AttributeDefinition == attributeDefinition).FirstOrDefault();
+                    SpecobjectViewModel specobjectViewModel = new SpecobjectViewModel()
+                    {
+                        Identifier = specObject.Identifier,
+                        AlternativeId = specObject.AlternativeId,
+                        Description = specObject.Description,
+                        LastChange = specObject.LastChange,
+                        LongName = specObject.LongName,
+                        Type = specObject.Type,
+                        SpecType = specObject.SpecType
+                    };
+                    foreach (AttributeDefinition attributeDefinition in specObject.SpecType.SpecAttributes)
+                    {
+                        AttributeValue attributeValue = specObject.Values.Where(x => x.AttributeDefinition == attributeDefinition).FirstOrDefault();
 
-                    specobjectViewModel.Values.Add(new AttributeValueViewModel() { AttributeValue = attributeValue, AttributeDefinition = attributeDefinition });
+                        specobjectViewModel.Values.Add(new AttributeValueViewModel() { AttributeValue = attributeValue, AttributeDefinition = attributeDefinition });
+                    }
+
+
+
+
+                    RowDef row = InitRow(parent, specobjectViewModel);
+                    srce.Add(row);
+                    ++count;
+
+                    int children = LoadData(row.Children, sh.Children, row);
+                    if (children > 0)
+                        row.IsExpanded = true;
                 }
 
-
-
-
-                RowDef row = InitRow(parent, specobjectViewModel);
-                srce.Add(row);
-                ++count;
-
-                int children = LoadData(row.Children, sh.Children, row);
-                if (children > 0)
-                    row.IsExpanded = true;
             }
             return count;
         }

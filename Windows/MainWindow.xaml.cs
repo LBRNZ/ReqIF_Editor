@@ -287,10 +287,14 @@ namespace ReqIF_Editor
                 MainDataGrid.Columns.Clear();
                 Source = new TreeDataGrid.GridDef(e.AddedItems[0] as Specification);
 
-                initializeColumns();
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Display"));
-                //Set Source of Navigation
-                NavigationTreeView.ItemsSource = (e.AddedItems[0] as Specification).Children;
+                if (Source.Source.Any())
+                {
+                    initializeColumns();
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Display"));
+                    //Set Source of Navigation
+                    NavigationTreeView.ItemsSource = (e.AddedItems[0] as Specification).Children;
+                }
+
             }
 
         }
